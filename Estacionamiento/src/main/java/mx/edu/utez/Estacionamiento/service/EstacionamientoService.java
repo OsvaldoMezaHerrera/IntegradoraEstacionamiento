@@ -99,7 +99,7 @@ public class EstacionamientoService {
 
     public void mostrarCochesActuales() {
         System.out.println("--- COCHES ACTUALMENTE ESTACIONADOS ---");
-        repository.lugaresOcupados.mostrar(); // Método listasimple
+        repository.lugaresOcupados.mostrar(); // Método ListaSimple
     }
 
     public void mostrarFilaEspera() {
@@ -109,7 +109,7 @@ public class EstacionamientoService {
 
     public void mostrarHistorialSalidas() {
         System.out.println("--- HISTORIAL DE SALIDAS (LIFO) ---");
-        repository.historialSalidas.MostrarPila(); // // Método pila
+        repository.historialSalidas.MostrarPila(); // Método pila
     }
 
     public int getLugaresOcupadosSize() {

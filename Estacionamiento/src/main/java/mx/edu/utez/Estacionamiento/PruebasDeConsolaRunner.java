@@ -30,7 +30,7 @@ public class PruebasDeConsolaRunner implements CommandLineRunner {
         Thread.sleep(1000);
         System.out.println(service.registrarEntrada("UTE-001"));
 
-        // Mostrar estado actual [cite: 13]
+        // Mostrar estado actual
         service.mostrarCochesActuales();
         service.mostrarFilaEspera();
 
@@ -46,7 +46,7 @@ public class PruebasDeConsolaRunner implements CommandLineRunner {
         // Mostrar estado después de la salida
         System.out.println("\n--- Estado después de la salida ---");
         service.mostrarCochesActuales();
-        service.mostrarHistorialSalidas(); // [cite: 14]
+        service.mostrarHistorialSalidas(); //
 
         // --- PRUEBA 4: LLENAR EL ESTACIONAMIENTO ---
         // (Asumiendo capacidad de 20 en el Repository)
