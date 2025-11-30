@@ -1,0 +1,255 @@
+/* ============================================
+   UTILITIES CSS - ParkSmart
+   Clases de utilidad para uso común
+   ============================================ */
+
+/* Display utilities */
+.util-hidden {
+  display: none !important;
+}
+
+.util-visible {
+  visibility: visible;
+}
+
+.util-invisible {
+  visibility: hidden;
+}
+
+.util-block {
+  display: block;
+}
+
+.util-inline-block {
+  display: inline-block;
+}
+
+.util-flex {
+  display: flex;
+}
+
+.util-grid {
+  display: grid;
+}
+
+/* Text utilities */
+.util-text-center {
+  text-align: center;
+}
+
+.util-text-left {
+  text-align: left;
+}
+
+.util-text-right {
+  text-align: right;
+}
+
+.util-text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.util-text-uppercase {
+  text-transform: uppercase;
+}
+
+.util-text-lowercase {
+  text-transform: lowercase;
+}
+
+.util-text-capitalize {
+  text-transform: capitalize;
+}
+
+/* Width utilities */
+.util-w-full {
+  width: 100%;
+}
+
+.util-w-auto {
+  width: auto;
+}
+
+.util-max-w-full {
+  max-width: 100%;
+}
+
+/* Height utilities */
+.util-h-full {
+  height: 100%;
+}
+
+.util-h-auto {
+  height: auto;
+}
+
+.util-min-h-screen {
+  min-height: 100vh;
+}
+
+/* Spacing utilities */
+.util-m-0 { margin: 0; }
+.util-m-auto { margin: auto; }
+.util-mt-auto { margin-top: auto; }
+.util-mb-auto { margin-bottom: auto; }
+.util-ml-auto { margin-left: auto; }
+.util-mr-auto { margin-right: auto; }
+
+.util-p-0 { padding: 0; }
+
+/* Position utilities */
+.util-relative {
+  position: relative;
+}
+
+.util-absolute {
+  position: absolute;
+}
+
+.util-fixed {
+  position: fixed;
+}
+
+.util-sticky {
+  position: sticky;
+}
+
+/* Overflow utilities */
+.util-overflow-hidden {
+  overflow: hidden;
+}
+
+.util-overflow-auto {
+  overflow: auto;
+}
+
+.util-overflow-x-hidden {
+  overflow-x: hidden;
+}
+
+.util-overflow-y-auto {
+  overflow-y: auto;
+}
+
+/* Cursor utilities */
+.util-cursor-pointer {
+  cursor: pointer;
+}
+
+.util-cursor-not-allowed {
+  cursor: not-allowed;
+}
+
+/* User select utilities */
+.util-select-none {
+  user-select: none;
+}
+
+.util-select-text {
+  user-select: text;
+}
+
+/* Z-index utilities */
+.util-z-10 {
+  z-index: 10;
+}
+
+.util-z-20 {
+  z-index: 20;
+}
+
+.util-z-30 {
+  z-index: 30;
+}
+
+.util-z-40 {
+  z-index: 40;
+}
+
+.util-z-50 {
+  z-index: 50;
+}
+
+/* Border radius utilities */
+.util-rounded-none {
+  border-radius: 0;
+}
+
+.util-rounded-sm {
+  border-radius: var(--border-radius-sm);
+}
+
+.util-rounded-md {
+  border-radius: var(--border-radius-md);
+}
+
+.util-rounded-lg {
+  border-radius: var(--border-radius-lg);
+}
+
+.util-rounded-full {
+  border-radius: var(--border-radius-full);
+}
+
+/* Shadow utilities */
+.util-shadow-none {
+  box-shadow: none;
+}
+
+.util-shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.util-shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.util-shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.util-shadow-xl {
+  box-shadow: var(--shadow-xl);
+}
+
+/* Opacity utilities */
+.util-opacity-0 {
+  opacity: 0;
+}
+
+.util-opacity-50 {
+  opacity: 0.5;
+}
+
+.util-opacity-100 {
+  opacity: 1;
+}
+
+/* Screen reader only */
+.util-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus visible (accesibilidad) */
+.util-focus-visible:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Print utilities */
+@media print {
+  .util-print-hidden {
+    display: none !important;
+  }
+}
+

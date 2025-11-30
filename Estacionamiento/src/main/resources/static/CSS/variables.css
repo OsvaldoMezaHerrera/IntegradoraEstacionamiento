@@ -1,0 +1,124 @@
+/* ============================================
+   VARIABLES CSS - ParkSmart
+   Sistema de diseño centralizado
+   ============================================ */
+
+:root {
+  /* Colores principales */
+  --color-primary: #1380ec;
+  --color-primary-hover: #0f6bc7;
+  --color-primary-dark: #0d5fa3;
+  
+  /* Colores de texto */
+  --color-text-primary: #0d141b;
+  --color-text-secondary: #4c739a;
+  --color-text-light: #ffffff;
+  
+  /* Colores de fondo */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc; /* slate-50 */
+  --color-bg-tertiary: #e7edf3;
+  --color-bg-hover: #d1d9e3;
+  
+  /* Colores de borde */
+  --color-border-primary: #e7edf3;
+  --color-border-secondary: #cfdbe7;
+  
+  /* Colores de estado */
+  --color-success: #10b981;
+  --color-success-bg: #d1fae5;
+  --color-error: #ef4444;
+  --color-error-bg: #fee2e2;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+  --color-info: #3b82f6;
+  --color-info-bg: #dbeafe;
+  
+  /* Espaciado */
+  --spacing-xs: 0.25rem;   /* 4px */
+  --spacing-sm: 0.5rem;    /* 8px */
+  --spacing-md: 1rem;       /* 16px */
+  --spacing-lg: 1.5rem;    /* 24px */
+  --spacing-xl: 2rem;      /* 32px */
+  --spacing-2xl: 2.5rem;   /* 40px */
+  --spacing-3xl: 3rem;     /* 48px */
+  
+  /* Tipografía */
+  --font-family-primary: 'Inter', 'Noto Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.875rem;  /* 14px */
+  --font-size-base: 1rem;    /* 16px */
+  --font-size-lg: 1.125rem;  /* 18px */
+  --font-size-xl: 1.25rem;   /* 20px */
+  --font-size-2xl: 1.5rem;   /* 24px */
+  --font-size-3xl: 1.875rem; /* 30px */
+  --font-size-4xl: 2.25rem;  /* 36px */
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+  
+  /* Bordes - Diseño Minimalista con bordes circulares */
+  --border-radius-sm: 0.5rem;   /* 8px */
+  --border-radius-md: 1rem;     /* 16px - más circular */
+  --border-radius-lg: 1.5rem;   /* 24px - muy circular */
+  --border-radius-xl: 2rem;     /* 32px - extremadamente circular */
+  --border-radius-full: 9999px;
+  
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 3px;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  /* Transiciones */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+  
+  /* Z-index */
+  --z-index-dropdown: 1000;
+  --z-index-sticky: 1020;
+  --z-index-fixed: 1030;
+  --z-index-modal-backdrop: 1040;
+  --z-index-modal: 1050;
+  --z-index-popover: 1060;
+  --z-index-tooltip: 1070;
+  
+  /* Breakpoints (para uso en JS si es necesario) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+  
+  /* Alturas y anchos comunes */
+  --height-input: 3.5rem;      /* 56px */
+  --height-button: 2.5rem;     /* 40px */
+  --height-button-lg: 3rem;    /* 48px */
+  --width-container: 960px;
+  --width-container-sm: 512px;
+  
+  /* Imagen del estacionamiento */
+  --estacionamiento-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBhzsul1xNEYxwLan5jOjmR9Sl-P-j8GjhnvaTB9pXzW4JMvsK9x0c_87akgLy-CL7_rrxGkiY73_N-bog1ix-XXgZkA1yU2l3O1UOzIgqqLiWHay-OGNNyFtVcKD0E9txlcINap_9VAShBXdU3viDScDNU77QXAMH2Y37P_ZL6d08vh-mDbbbfuclw52dPwafaYJw5KHYn55wmeZkWsLwghoLtOZMK5oDQ2CI1ke-yKaT890L8u3Njn94dCZb-2aETcGSzpRhGk-rE");
+  
+  /* Select button SVG */
+  --select-button-svg: url('data:image/svg+xml,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724px%27 height=%2724px%27 fill=%27rgb(76,115,154)%27 viewBox=%270 0 256 256%27%3e%3cpath d=%27M181.66,170.34a8,8,0,0,1,0,11.32l-48,48a8,8,0,0,1-11.32,0l-48-48a8,8,0,0,1,11.32-11.32L128,212.69l42.34-42.35A8,8,0,0,1,181.66,170.34Zm-96-84.68L128,43.31l42.34,42.35a8,8,0,0,0,11.32-11.32l-48-48a8,8,0,0,0-11.32,0l-48,48A8,8,0,0,0,85.66,85.66Z%27%3e%3c/path%3e%3c/svg%3e');
+}
+
+/* Modo oscuro (preparado para futuro) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Variables para modo oscuro pueden agregarse aquí */
+  }
+}
+

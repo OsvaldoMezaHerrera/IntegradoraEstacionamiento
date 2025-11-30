@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Sistema de gestión de estacionamiento ParkSmart - Visualiza la disponibilidad de espacios en tiempo real" />
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+    
+    <title>ParkSmart - Sistema de Estacionamiento</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    
+    <!-- Estilos - Orden de carga importante -->
+    <link rel="stylesheet" href="CSS/common.css" />
+  </head>
+  <body>
+    <!-- Contenedor principal de la aplicación -->
+    <div class="app-wrapper">
+      <div class="app-layout">
+        
+        <!-- ========== CABECERA / HEADER ========== -->
+        <header class="app-header" role="banner">
+          <!-- Logo y nombre de la aplicación -->
+          <a href="index.html" class="app-header-logo" aria-label="Ir a la página de inicio">
+            <svg class="app-header-logo-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <g clip-path="url(#clip0_6_543)">
+                <path
+                  d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z"
+                  fill="currentColor"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M7.24189 26.4066C7.31369 26.4411 7.64204 26.5637 8.52504 26.3738C9.59462 26.1438 11.0343 25.5311 12.7183 24.4963C14.7583 23.2426 17.0256 21.4503 19.238 19.238C21.4503 17.0256 23.2426 14.7583 24.4963 12.7183C25.5311 11.0343 26.1438 9.59463 26.3738 8.52504C26.5637 7.64204 26.4411 7.31369 26.4066 7.24189C26.345 7.21246 26.143 7.14535 25.6664 7.1918C24.9745 7.25925 23.9954 7.5498 22.7699 8.14278C20.3369 9.32007 17.3369 11.4915 14.4142 14.4142C11.4915 17.3369 9.32007 20.3369 8.14278 22.7699C7.5498 23.9954 7.25925 24.9745 7.1918 25.6664C7.14534 26.143 7.21246 26.345 7.24189 26.4066ZM29.9001 10.7285C29.4519 12.0322 28.7617 13.4172 27.9042 14.8126C26.465 17.1544 24.4686 19.6641 22.0664 22.0664C19.6641 24.4686 17.1544 26.465 14.8126 27.9042C13.4172 28.7617 12.0322 29.4519 10.7285 29.9001L21.5754 40.747C21.6001 40.7606 21.8995 40.931 22.8729 40.7217C23.9424 40.4916 25.3821 39.879 27.0661 38.8441C29.1062 37.5904 31.3734 35.7982 33.5858 33.5858C35.7982 31.3734 37.5904 29.1062 38.8441 27.0661C39.879 25.3821 40.4916 23.9425 40.7216 22.8729C40.931 21.8995 40.7606 21.6001 40.747 21.5754L29.9001 10.7285ZM29.2403 4.41187L43.5881 18.7597C44.9757 20.1473 44.9743 22.1235 44.6322 23.7139C44.2714 25.3919 43.4158 27.2666 42.252 29.1604C40.8128 31.5022 38.8165 34.012 36.4142 36.4142C34.012 38.8165 31.5022 40.8128 29.1604 42.252C27.2666 43.4158 25.3919 44.2714 23.7139 44.6322C22.1235 44.9743 20.1473 44.9757 18.7597 43.5881L4.41187 29.2403C3.29027 28.1187 3.08209 26.5973 3.21067 25.2783C3.34099 23.9415 3.8369 22.4852 4.54214 21.0277C5.96129 18.0948 8.43335 14.7382 11.5858 11.5858C14.7382 8.43335 18.0948 5.9613 21.0277 4.54214C22.4852 3.8369 23.9415 3.34099 25.2783 3.21067C26.5973 3.08209 28.1187 3.29028 29.2403 4.41187Z"
+                  fill="currentColor"
+                ></path>
+              </g>
+              <defs>
+                <clipPath id="clip0_6_543"><rect width="48" height="48" fill="white"></rect></clipPath>
+              </defs>
+            </svg>
+            <h1 class="app-header-logo-text">ParkSmart</h1>
+          </a>
+          
+          <!-- Menú de navegación y acciones del usuario -->
+          <nav class="app-header-nav" role="navigation" aria-label="Navegación principal">
+            <!-- Enlaces de navegación -->
+            <ul class="app-header-nav-links">
+              <li><a href="index.html" class="app-header-nav-link" aria-label="Ir a la página de inicio" aria-current="page">Inicio</a></li>
+              <li><a href="registro.html" class="app-header-nav-link" aria-label="Ir a la página de registro de entrada">Entrada</a></li>
+              <li><a href="salida.html" class="app-header-nav-link" aria-label="Ir a la página de procesamiento de salida">Salida</a></li>
+              <li><a href="reportes.html" class="app-header-nav-link" aria-label="Ir a la página de reportes e historial">Reportes</a></li>
+              <li><a href="tarifas.html" class="app-header-nav-link" aria-label="Ir a la página de gestión de tarifas">Tarifas</a></li>
+            </ul>
+            
+          </nav>
+        </header>
+
+        <!-- ========== CONTENIDO PRINCIPAL ========== -->
+        <main class="app-main" role="main">
+          <div class="app-content">
+            
+            <!-- Sección: Título y descripción -->
+            <section class="app-section" aria-labelledby="titulo-estado">
+              <div class="app-section-header">
+                <h2 id="titulo-estado" class="app-section-title">
+                  Estado del Estacionamiento
+                </h2>
+                <p class="app-section-description">
+                  Visualiza la disponibilidad de espacios en tiempo real.
+                </p>
+              </div>
+            </section>
+
+            <!-- Sección: Tarjetas de estadísticas -->
+            <section class="app-section app-flex app-flex-wrap app-gap-md" aria-label="Estadísticas del estacionamiento">
+              <!-- Tarjeta: Espacios Disponibles -->
+              <article class="card card-statistics" aria-label="Espacios disponibles">
+                <div class="app-flex app-flex-col app-gap-sm">
+                  <p style="font-size: var(--font-size-base); font-weight: var(--font-weight-medium); color: var(--color-text-primary); margin: 0;">
+                    Espacios Disponibles
+                  </p>
+                  <p style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin: 0;" id="espacios-disponibles" aria-live="polite">
+                    20
+                  </p>
+                </div>
+              </article>
+              
+              <!-- Tarjeta: Espacios Ocupados -->
+              <article class="card card-statistics" aria-label="Espacios ocupados">
+                <div class="app-flex app-flex-col app-gap-sm">
+                  <p style="font-size: var(--font-size-base); font-weight: var(--font-weight-medium); color: var(--color-text-primary); margin: 0;">
+                    Espacios Ocupados
+                  </p>
+                  <p style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin: 0;" id="espacios-ocupados" aria-live="polite">
+                    0
+                  </p>
+                </div>
+              </article>
+
+              <!-- Tarjeta: Vehículos en Espera -->
+              <article class="card card-statistics" aria-label="Vehículos en espera">
+                <div class="app-flex app-flex-col app-gap-sm">
+                  <p style="font-size: var(--font-size-base); font-weight: var(--font-weight-medium); color: var(--color-text-primary); margin: 0;">
+                    En Espera
+                  </p>
+                  <p style="font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); color: var(--color-text-primary); margin: 0;" id="vehiculos-espera" aria-live="polite">
+                    0
+                  </p>
+                </div>
+              </article>
+            </section>
+
+            <!-- Sección: Fila de Espera -->
+            <section class="app-section" aria-labelledby="titulo-espera">
+              <div class="app-section-header">
+                <h2 id="titulo-espera" class="app-section-subtitle">
+                  Fila de Espera
+                </h2>
+                <p class="app-section-description">
+                  Vehículos esperando un espacio disponible en el estacionamiento.
+                </p>
+              </div>
+
+              <!-- Contenedor de la lista de espera -->
+              <div id="lista-espera-contenedor" class="card" style="min-height: 100px;">
+                <div id="mensaje-espera-vacia" class="util-hidden" style="text-align: center; padding: var(--spacing-lg); color: var(--color-text-secondary);">
+                  <p style="margin: 0; font-size: var(--font-size-sm);">No hay vehículos en espera.</p>
+                </div>
+                <div id="lista-espera" class="app-flex app-flex-col app-gap-xs">
+                  <!-- Los vehículos se insertarán dinámicamente mediante JavaScript -->
+                </div>
+              </div>
+            </section>
+
+            <!-- Sección: Imagen del estacionamiento -->
+            <section class="app-section" aria-label="Vista del estacionamiento">
+              <div class="app-flex app-flex-col app-gap-md">
+                <div class="estacionamiento-image" style="width: 100%; aspect-ratio: 16/9; border-radius: var(--border-radius-xl);" role="img" aria-label="Vista aérea del estacionamiento"></div>
+              </div>
+            </section>
+
+            <!-- ========== MODAL: REGISTRAR ENTRADA ========== -->
+            <div
+              id="modal-entrada"
+              class="util-hidden modal-backdrop"
+              role="dialog"
+              aria-labelledby="titulo-modal-entrada"
+              aria-modal="true"
+            >
+              <div class="modal">
+                <div class="modal-header">
+                  <h3 id="titulo-modal-entrada" class="modal-title">
+                    Registrar Entrada
+                  </h3>
+                </div>
+                <form id="formulario-entrada" class="modal-body" onsubmit="return false;">
+                  <div class="form-group">
+                    <label for="placa-entrada" class="form-label">
+                      Placa del Vehículo
+                    </label>
+                    <input
+                      type="text"
+                      id="placa-entrada"
+                      name="placa-entrada"
+                      placeholder="Ingrese la placa del vehículo"
+                      required
+                      class="form-input"
+                      aria-required="true"
+                      aria-describedby="mensaje-entrada"
+                    />
+                  </div>
+                  <div id="mensaje-entrada" class="alert" role="status" aria-live="polite" style="display: none;"></div>
+                </form>
+                <div class="modal-footer">
+                  <button
+                    id="confirmar-entrada"
+                    type="button"
+                    class="btn btn-primary"
+                    aria-label="Confirmar registro de entrada"
+                  >
+                    Confirmar
+                  </button>
+                  <button
+                    id="cancelar-entrada"
+                    type="button"
+                    class="btn btn-secondary"
+                    aria-label="Cancelar registro de entrada"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ========== MODAL: REGISTRAR SALIDA ========== -->
+            <div
+              id="modal-salida"
+              class="util-hidden modal-backdrop"
+              role="dialog"
+              aria-labelledby="titulo-modal-salida"
+              aria-modal="true"
+            >
+              <div class="modal">
+                <div class="modal-header">
+                  <h3 id="titulo-modal-salida" class="modal-title">
+                    Registrar Salida
+                  </h3>
+                </div>
+                <form id="formulario-salida" class="modal-body" onsubmit="return false;">
+                  <div class="form-group">
+                    <label for="placa-salida" class="form-label">
+                      Placa del Vehículo
+                    </label>
+                    <input
+                      type="text"
+                      id="placa-salida"
+                      name="placa-salida"
+                      placeholder="Ingrese la placa del vehículo"
+                      required
+                      class="form-input"
+                      aria-required="true"
+                      aria-describedby="mensaje-salida"
+                    />
+                  </div>
+                  <div id="mensaje-salida" class="alert" role="status" aria-live="polite" style="display: none;"></div>
+                </form>
+                <div class="modal-footer">
+                  <button
+                    id="confirmar-salida"
+                    type="button"
+                    class="btn btn-primary"
+                    aria-label="Confirmar registro de salida"
+                  >
+                    Confirmar
+                  </button>
+                  <button
+                    id="cancelar-salida"
+                    type="button"
+                    class="btn btn-secondary"
+                    aria-label="Cancelar registro de salida"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Scripts JavaScript - Orden de carga importante -->
+    <script src="JS/config.js"></script>
+    <script src="JS/common.js"></script>
+    <script src="JS/index.js"></script>
+  </body>
+</html>

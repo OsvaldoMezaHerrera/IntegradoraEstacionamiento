@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Gestión de tarifas de estacionamiento ParkSmart - Configure y ajuste las tarifas" />
+    
+    <!-- Fuentes de Google -->
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link
+      rel="stylesheet"
+      as="style"
+      onload="this.rel='stylesheet'"
+      href="https://fonts.googleapis.com/css2?display=swap&amp;family=Inter%3Awght%40400%3B500%3B700%3B900&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900"
+    />
+    
+    <title>Gestión de Tarifas - ParkSmart</title>
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64," />
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="CSS/common.css" />
+    <link rel="stylesheet" href="CSS/tarifas.css" />
+  </head>
+  <body>
+    <!-- Contenedor principal de la aplicación -->
+    <div class="app-wrapper">
+      <div class="app-layout">
+        
+        <!-- ========== CABECERA / HEADER ========== -->
+        <header class="app-header" role="banner">
+          <!-- Logo y nombre de la aplicación -->
+          <a href="index.html" class="app-header-logo" aria-label="Ir a la página de inicio">
+            <svg class="app-header-logo-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <g clip-path="url(#clip0_6_543)">
+                <path
+                  d="M42.1739 20.1739L27.8261 5.82609C29.1366 7.13663 28.3989 10.1876 26.2002 13.7654C24.8538 15.9564 22.9595 18.3449 20.6522 20.6522C18.3449 22.9595 15.9564 24.8538 13.7654 26.2002C10.1876 28.3989 7.13663 29.1366 5.82609 27.8261L20.1739 42.1739C21.4845 43.4845 24.5355 42.7467 28.1133 40.548C30.3042 39.2016 32.6927 37.3073 35 35C37.3073 32.6927 39.2016 30.3042 40.548 28.1133C42.7467 24.5355 43.4845 21.4845 42.1739 20.1739Z"
+                  fill="currentColor"
+                ></path>
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M7.24189 26.4066C7.31369 26.4411 7.64204 26.5637 8.52504 26.3738C9.59462 26.1438 11.0343 25.5311 12.7183 24.4963C14.7583 23.2426 17.0256 21.4503 19.238 19.238C21.4503 17.0256 23.2426 14.7583 24.4963 12.7183C25.5311 11.0343 26.1438 9.59463 26.3738 8.52504C26.5637 7.64204 26.4411 7.31369 26.4066 7.24189C26.345 7.21246 26.143 7.14535 25.6664 7.1918C24.9745 7.25925 23.9954 7.5498 22.7699 8.14278C20.3369 9.32007 17.3369 11.4915 14.4142 14.4142C11.4915 17.3369 9.32007 20.3369 8.14278 22.7699C7.5498 23.9954 7.25925 24.9745 7.1918 25.6664C7.14534 26.143 7.21246 26.345 7.24189 26.4066ZM29.9001 10.7285C29.4519 12.0322 28.7617 13.4172 27.9042 14.8126C26.465 17.1544 24.4686 19.6641 22.0664 22.0664C19.6641 24.4686 17.1544 26.465 14.8126 27.9042C13.4172 28.7617 12.0322 29.4519 10.7285 29.9001L21.5754 40.747C21.6001 40.7606 21.8995 40.931 22.8729 40.7217C23.9424 40.4916 25.3821 39.879 27.0661 38.8441C29.1062 37.5904 31.3734 35.7982 33.5858 33.5858C35.7982 31.3734 37.5904 29.1062 38.8441 27.0661C39.879 25.3821 40.4916 23.9425 40.7216 22.8729C40.931 21.8995 40.7606 21.6001 40.747 21.5754L29.9001 10.7285ZM29.2403 4.41187L43.5881 18.7597C44.9757 20.1473 44.9743 22.1235 44.6322 23.7139C44.2714 25.3919 43.4158 27.2666 42.252 29.1604C40.8128 31.5022 38.8165 34.012 36.4142 36.4142C34.012 38.8165 31.5022 40.8128 29.1604 42.252C27.2666 43.4158 25.3919 44.2714 23.7139 44.6322C22.1235 44.9743 20.1473 44.9757 18.7597 43.5881L4.41187 29.2403C3.29027 28.1187 3.08209 26.5973 3.21067 25.2783C3.34099 23.9415 3.8369 22.4852 4.54214 21.0277C5.96129 18.0948 8.43335 14.7382 11.5858 11.5858C14.7382 8.43335 18.0948 5.9613 21.0277 4.54214C22.4852 3.8369 23.9415 3.34099 25.2783 3.21067C26.5973 3.08209 28.1187 3.29028 29.2403 4.41187Z"
+                  fill="currentColor"
+                ></path>
+              </g>
+              <defs>
+                <clipPath id="clip0_6_543"><rect width="48" height="48" fill="white"></rect></clipPath>
+              </defs>
+            </svg>
+            <h1 class="app-header-logo-text">ParkSmart</h1>
+          </a>
+          
+          <!-- Menú de navegación -->
+          <nav class="app-header-nav" role="navigation" aria-label="Navegación principal">
+            <ul class="app-header-nav-links">
+              <li><a href="index.html" class="app-header-nav-link" aria-label="Ir a la página de inicio">Inicio</a></li>
+              <li><a href="registro.html" class="app-header-nav-link" aria-label="Ir a la página de registro de entrada">Entrada</a></li>
+              <li><a href="salida.html" class="app-header-nav-link" aria-label="Ir a la página de procesamiento de salida">Salida</a></li>
+              <li><a href="reportes.html" class="app-header-nav-link" aria-label="Ir a la página de reportes e historial">Reportes</a></li>
+              <li><a href="tarifas.html" class="app-header-nav-link" aria-label="Ir a la página de gestión de tarifas" aria-current="page">Tarifas</a></li>
+            </ul>
+          </nav>
+        </header>
+
+        <!-- ========== CONTENIDO PRINCIPAL ========== -->
+        <main class="app-main" role="main">
+          <div class="app-content" style="max-width: 800px;">
+            
+            <!-- Sección: Título y descripción -->
+            <section class="app-section" aria-labelledby="titulo-tarifas">
+              <div class="app-section-header">
+                <h2 id="titulo-tarifas" class="app-section-title">
+                  Gestión de Tarifas
+                </h2>
+                <p class="app-section-description">
+                  Configure y ajuste las tarifas de estacionamiento según diferentes rangos de tiempo.
+                </p>
+              </div>
+            </section>
+
+            <!-- Formulario de tarifas -->
+            <form class="card" aria-label="Formulario de gestión de tarifas" onsubmit="return false;">
+              
+              <!-- Sección: Tabla de Tarifas por Tiempo -->
+              <div class="form-group">
+                <label class="form-label">
+                  Tarifas por Rango de Tiempo
+                </label>
+                <div class="table-container" style="border-radius: var(--border-radius-lg);">
+                  <table class="table" role="table" aria-label="Tarifas de estacionamiento por rango de tiempo">
+                    <thead>
+                      <tr role="row">
+                        <th scope="col">Rango de Tiempo</th>
+                        <th scope="col">Tarifa</th>
+                      </tr>
+                    </thead>
+                    <tbody role="rowgroup">
+                      <!-- Fila: Tarifa 1 Minuto -->
+                      <tr role="row">
+                        <td role="cell">1 Minuto</td>
+                        <td role="cell">
+                          <label for="tarifa-1-minuto" class="util-sr-only">Tarifa para 1 minuto</label>
+                          <input
+                            type="number"
+                            id="tarifa-1-minuto"
+                            name="tarifa-1-minuto"
+                            step="0.01"
+                            min="0"
+                            class="form-input"
+                            style="min-height: 2.5rem; padding: var(--spacing-sm) var(--spacing-md);"
+                            aria-label="Ingrese la tarifa para estancias de 1 minuto"
+                            aria-required="true"
+                          />
+                        </td>
+                      </tr>
+                      
+                      <!-- Fila: Tarifa 0-1 Hora -->
+                      <tr role="row">
+                        <td role="cell">0-1 Hora</td>
+                        <td role="cell">
+                          <label for="tarifa-0-1" class="util-sr-only">Tarifa para 0 a 1 hora</label>
+                          <input
+                            type="number"
+                            id="tarifa-0-1"
+                            name="tarifa-0-1"
+                            step="0.01"
+                            min="0"
+                            class="form-input"
+                            style="min-height: 2.5rem; padding: var(--spacing-sm) var(--spacing-md);"
+                            aria-label="Ingrese la tarifa para estancias de 0 a 1 hora"
+                            aria-required="true"
+                          />
+                        </td>
+                      </tr>
+                      
+                      <!-- Fila: Tarifa 1-2 Horas -->
+                      <tr role="row">
+                        <td role="cell">1-2 Horas</td>
+                        <td role="cell">
+                          <label for="tarifa-1-2" class="util-sr-only">Tarifa para 1 a 2 horas</label>
+                          <input
+                            type="number"
+                            id="tarifa-1-2"
+                            name="tarifa-1-2"
+                            step="0.01"
+                            min="0"
+                            class="form-input"
+                            style="min-height: 2.5rem; padding: var(--spacing-sm) var(--spacing-md);"
+                            aria-label="Ingrese la tarifa para estancias de 1 a 2 horas"
+                            aria-required="true"
+                          />
+                        </td>
+                      </tr>
+                      
+                      <!-- Fila: Tarifa 2+ Horas -->
+                      <tr role="row">
+                        <td role="cell">2+ Horas</td>
+                        <td role="cell">
+                          <label for="tarifa-2-plus" class="util-sr-only">Tarifa para más de 2 horas</label>
+                          <input
+                            type="number"
+                            id="tarifa-2-plus"
+                            name="tarifa-2-plus"
+                            step="0.01"
+                            min="0"
+                            class="form-input"
+                            style="min-height: 2.5rem; padding: var(--spacing-sm) var(--spacing-md);"
+                            aria-label="Ingrese la tarifa para estancias de más de 2 horas"
+                            aria-required="true"
+                          />
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Sección: Tarifas Adicionales -->
+              <div class="form-group">
+                <h3 class="app-section-subtitle" style="padding-top: 0; padding-bottom: var(--spacing-md); font-size: var(--font-size-lg);">
+                  Tarifas Adicionales
+                </h3>
+                
+                <!-- Campo: Máximo Diario -->
+                <div class="form-group" style="margin-bottom: var(--spacing-md);">
+                  <label for="maximo-diario" class="form-label">
+                    Máximo Diario
+                  </label>
+                  <input
+                    id="maximo-diario"
+                    name="maximo-diario"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0 = Sin límite"
+                    class="form-input"
+                    aria-label="Ingrese el máximo diario de tarifa (0 significa sin límite)"
+                    aria-describedby="ayuda-maximo-diario"
+                  />
+                  <span id="ayuda-maximo-diario" class="form-help">
+                    Ingrese 0 para indicar que no hay límite diario
+                  </span>
+                </div>
+
+                <!-- Campo: Máximo Semanal -->
+                <div class="form-group" style="margin-bottom: var(--spacing-md);">
+                  <label for="maximo-semanal" class="form-label">
+                    Máximo Semanal
+                  </label>
+                  <input
+                    id="maximo-semanal"
+                    name="maximo-semanal"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0 = Sin límite"
+                    class="form-input"
+                    aria-label="Ingrese el máximo semanal de tarifa (0 significa sin límite)"
+                    aria-describedby="ayuda-maximo-semanal"
+                  />
+                  <span id="ayuda-maximo-semanal" class="form-help">
+                    Ingrese 0 para indicar que no hay límite semanal
+                  </span>
+                </div>
+
+                <!-- Campo: Tarifa por Ticket Perdido -->
+                <div class="form-group" style="margin-bottom: var(--spacing-md);">
+                  <label for="ticket-perdido" class="form-label">
+                    Tarifa por Ticket Perdido
+                  </label>
+                  <input
+                    id="ticket-perdido"
+                    name="ticket-perdido"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    class="form-input"
+                    aria-label="Ingrese la tarifa a cobrar cuando se pierde el ticket de estacionamiento"
+                  />
+                  <span class="form-help">
+                    Tarifa adicional cuando el cliente pierde su ticket
+                  </span>
+                </div>
+              </div>
+
+              <!-- Mensaje de estado del formulario -->
+              <div id="mensaje-tarifas" class="alert" role="status" aria-live="polite" style="display: none; margin-bottom: var(--spacing-md);"></div>
+
+              <!-- Botón: Guardar Cambios -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <button
+                  id="btn-guardar"
+                  type="button"
+                  class="btn btn-primary btn-full"
+                  aria-label="Guardar los cambios en las tarifas de estacionamiento"
+                >
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Scripts JavaScript - Orden de carga importante -->
+    <script src="JS/config.js"></script>
+    <script src="JS/common.js"></script>
+    <script src="JS/tarifas.js"></script>
+  </body>
+</html>

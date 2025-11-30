@@ -1,0 +1,82 @@
+/* ============================================
+   ESTILOS ESPECÍFICOS - Reportes
+   Diseño minimalista para la tabla de historial
+   ============================================ */
+
+/* Tabla minimalista con bordes circulares */
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table thead {
+  background-color: var(--color-bg-secondary);
+}
+
+.table th {
+  padding: var(--spacing-md) var(--spacing-lg);
+  text-align: left;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  border-bottom: var(--border-width-thin) solid var(--color-border-secondary);
+}
+
+.table th:first-child {
+  border-top-left-radius: var(--border-radius-lg);
+}
+
+.table th:last-child {
+  border-top-right-radius: var(--border-radius-lg);
+}
+
+.table td {
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  border-bottom: var(--border-width-thin) solid var(--color-border-primary);
+  background-color: var(--color-bg-primary);
+}
+
+.table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: var(--border-radius-lg);
+}
+
+.table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: var(--border-radius-lg);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-bg-tertiary);
+}
+
+.table tbody tr:hover td {
+  background-color: var(--color-bg-tertiary);
+}
+
+/* Responsive - Ocultar columnas en pantallas pequeñas */
+@media (max-width: 768px) {
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .table th:nth-child(4),
+  .table td:nth-child(4) {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .table th:nth-child(2),
+  .table td:nth-child(2) {
+    display: none;
+  }
+}

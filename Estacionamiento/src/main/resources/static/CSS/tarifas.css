@@ -1,0 +1,36 @@
+/* ============================================
+   ESTILOS ESPECÍFICOS - Tarifas
+   Diseño minimalista para la tabla de tarifas
+   ============================================ */
+
+/* Tabla de tarifas minimalista */
+.table-container {
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-lg);
+  background-color: var(--color-bg-primary);
+  overflow: hidden;
+}
+
+.table-container .table {
+  margin: 0;
+}
+
+.table-container .table td input {
+  width: 100%;
+  border: var(--border-width-thin) solid var(--color-border-primary);
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-normal);
+}
+
+.table-container .table td input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(19, 128, 236, 0.08);
+  outline: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-container {
+    overflow-x: auto;
+  }
+}
