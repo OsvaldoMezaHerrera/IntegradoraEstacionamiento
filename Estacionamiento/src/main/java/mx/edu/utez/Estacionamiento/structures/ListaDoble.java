@@ -148,4 +148,13 @@ public class ListaDoble<T> {
     public int getTamano() {
         return tamano;
     }
+
+    /**
+     * Limpia la lista completamente
+     */
+    public void limpiar() {
+        head = null;
+        tail = null;
+        tamano = 0;
+    }
 }

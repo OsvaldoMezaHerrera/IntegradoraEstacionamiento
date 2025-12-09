@@ -138,17 +138,6 @@ btnProcesar.addEventListener("click", async () => {
     return;
   }
 
-  const metodoPago = document.querySelector(
-    'input[name="metodo-pago"]:checked'
-  );
-  if (!metodoPago) {
-    mostrarMensaje(
-      "mensaje-procesamiento",
-      "Por favor seleccione un método de pago",
-      true
-    );
-    return;
-  }
 
   btnProcesar.disabled = true;
   btnProcesar.innerHTML =
@@ -180,19 +169,64 @@ btnProcesar.addEventListener("click", async () => {
           }
 
           if (data.exito) {
+            // Actualizar los detalles de la tarifa con la información final
+            console.log("=== DATOS RECIBIDOS DEL SERVIDOR ===");
+            console.log("Objeto completo:", data);
+            console.log("tarifaTotal (raw):", data.tarifaTotal);
+            console.log("tarifaTotal (type):", typeof data.tarifaTotal);
+            console.log("tarifaPorHora (raw):", data.tarifaPorHora);
+            console.log("tarifaPorMinuto (raw):", data.tarifaPorMinuto);
+            console.log("tiempoMinutos:", data.tiempoMinutos);
+            console.log("tiempoHoras:", data.tiempoHoras);
+            
+            // Asegurar que la sección de detalles esté visible
+            detallesEstancia.classList.remove("util-hidden");
+            
+            // Actualizar tiempo de estancia
+            const horas = data.tiempoHoras != null ? Number(data.tiempoHoras) : 0;
+            const minutos = data.tiempoMinutosRestantes != null ? Number(data.tiempoMinutosRestantes) : 0;
+            document.getElementById("tiempo-estancia").textContent =
+              formatearTiempo(horas, minutos);
+            
+            // Actualizar tarifa por hora
+            const tarifaPorHora = data.tarifaPorHora != null ? Number(data.tarifaPorHora) : 0;
+            console.log("tarifaPorHora convertida:", tarifaPorHora);
+            document.getElementById("tarifa-hora").textContent = ParkSmart.Utils.formatearMoneda(tarifaPorHora);
+            
+            // Actualizar tarifa total (siempre mostrar, incluso si es 0)
+            let tarifaTotal = 0;
+            if (data.tarifaTotal != null && data.tarifaTotal !== undefined) {
+              tarifaTotal = Number(data.tarifaTotal);
+              console.log("tarifaTotal después de Number():", tarifaTotal);
+              console.log("Es NaN?", isNaN(tarifaTotal));
+            } else {
+              console.warn("⚠️ tarifaTotal es null o undefined");
+            }
+            
+            if (isNaN(tarifaTotal)) {
+              console.error("⚠️ ERROR: tarifaTotal no es un número válido:", data.tarifaTotal);
+              console.error("   Intentando parseFloat...");
+              tarifaTotal = parseFloat(data.tarifaTotal) || 0;
+              console.error("   Resultado de parseFloat:", tarifaTotal);
+            }
+            
+            console.log("Valor final de tarifaTotal que se mostrará:", tarifaTotal);
+            document.getElementById("tarifa-total").textContent = ParkSmart.Utils.formatearMoneda(tarifaTotal);
+            console.log("Texto mostrado en pantalla:", document.getElementById("tarifa-total").textContent);
+            
             ParkSmart.Messages.mostrar(
               "mensaje-procesamiento",
-              `✓ ${data.mensaje} - Pago procesado con ${metodoPago.value}`,
+              `✓ ${data.mensaje}`,
               false
             );
-            // Limpiar formulario después de 3 segundos
+            // Limpiar formulario después de 8 segundos (más tiempo para ver la tarifa)
             setTimeout(() => {
               matriculaInput.value = "";
               detallesEstancia.classList.add("util-hidden");
               infoVehiculo = null;
               ParkSmart.Messages.mostrar("mensaje-busqueda", "");
               ParkSmart.Messages.mostrar("mensaje-procesamiento", "");
-            }, 3000);
+            }, 8000);
           } else {
             ParkSmart.Messages.mostrar("mensaje-procesamiento", data.mensaje || "Error al procesar la salida", true);
           }

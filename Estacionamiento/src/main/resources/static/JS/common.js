@@ -27,7 +27,11 @@ ParkSmart.Utils.formatearMoneda = function(cantidad, simbolo = '$', decimales = 
   if (typeof cantidad !== 'number' || isNaN(cantidad)) {
     return simbolo + '0.00';
   }
-  return simbolo + cantidad.toFixed(decimales);
+  // Formatear con separadores de miles
+  return simbolo + cantidad.toLocaleString('es-MX', {
+    minimumFractionDigits: decimales,
+    maximumFractionDigits: decimales
+  });
 };
 
 /**

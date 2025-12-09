@@ -77,6 +77,13 @@ public class ColaCircular<T> {
         return cantidad;
     }
 
+    /**
+     * Alias para obtenerTamano() para consistencia con otras estructuras
+     */
+    public int Tamano() {
+        return cantidad;
+    }
+
     public void imprimir() {
         if (colaVacia()) {
             System.out.println("Cola vacía");

@@ -18,18 +18,36 @@ import java.util.Map;
 @RequestMapping("/api/estacionamiento")
 public class EstacionamientoController {
 
+    private final EstacionamientoService service;
+
+    // Inyección por constructor
     @Autowired
-    private EstacionamientoService service;
+    public EstacionamientoController(EstacionamientoService service) {
+        if (service == null) {
+            throw new IllegalStateException("EstacionamientoService no puede ser null");
+        }
+        this.service = service;
+        System.out.println("✅ EstacionamientoController: Servicio inicializado correctamente");
+    }
 
     // --- Obtener estadísticas del estacionamiento ---
     @GetMapping("/estadisticas")
     public ResponseEntity<Map<String, Object>> obtenerEstadisticas() {
-        Map<String, Object> estadisticas = new HashMap<>();
-        estadisticas.put("capacidadMaxima", service.getCapacidadMaxima());
-        estadisticas.put("lugaresOcupados", service.getLugaresOcupadosSize());
-        estadisticas.put("lugaresDisponibles", service.getLugaresDisponibles());
-        estadisticas.put("vehiculosEnEspera", service.getFilaEsperaSize());
-        return ResponseEntity.ok(estadisticas);
+        try {
+            Map<String, Object> estadisticas = new HashMap<>();
+            estadisticas.put("capacidadMaxima", service.getCapacidadMaxima());
+            estadisticas.put("lugaresOcupados", service.getLugaresOcupadosSize());
+            estadisticas.put("lugaresDisponibles", service.getLugaresDisponibles());
+            estadisticas.put("vehiculosEnEspera", service.getFilaEsperaSize());
+            return ResponseEntity.ok(estadisticas);
+        } catch (Exception e) {
+            System.err.println("❌ Error al obtener estadísticas: " + e.getMessage());
+            e.printStackTrace();
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Error al obtener estadísticas");
+            error.put("mensaje", e.getMessage());
+            return ResponseEntity.status(500).body(error);
+        }
     }
 
     // --- Obtener lista de coches actuales ---
@@ -71,11 +89,7 @@ public class EstacionamientoController {
     @PostMapping("/salida")
     public ResponseEntity<Map<String, Object>> registrarSalida(@RequestBody Map<String, String> request) {
         String placa = request.get("placa");
-        String mensaje = service.registrarSalida(placa);
-        
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", mensaje);
-        respuesta.put("exito", !mensaje.startsWith("ERROR"));
+        Map<String, Object> resultado = service.registrarSalida(placa);
         
         // Incluir estadísticas actualizadas
         Map<String, Object> estadisticas = new HashMap<>();
@@ -83,9 +97,9 @@ public class EstacionamientoController {
         estadisticas.put("lugaresOcupados", service.getLugaresOcupadosSize());
         estadisticas.put("lugaresDisponibles", service.getLugaresDisponibles());
         estadisticas.put("vehiculosEnEspera", service.getFilaEsperaSize());
-        respuesta.put("estadisticas", estadisticas);
+        resultado.put("estadisticas", estadisticas);
         
-        return ResponseEntity.ok(respuesta);
+        return ResponseEntity.ok(resultado);
     }
 
     // --- Obtener información de vehículo para calcular tarifa ---
@@ -135,8 +149,9 @@ public class EstacionamientoController {
     }
 
     @GetMapping("/salida/{placa}")
-    public ResponseEntity<String> registrarSalidaGet(@PathVariable String placa) {
-        String mensaje = service.registrarSalida(placa);
-        return ResponseEntity.ok(mensaje);
+    public ResponseEntity<Map<String, Object>> registrarSalidaGet(@PathVariable String placa) {
+        Map<String, Object> resultado = service.registrarSalida(placa);
+        return ResponseEntity.ok(resultado);
     }
+
 }

@@ -1,50 +1,124 @@
 package mx.edu.utez.Estacionamiento.repository;
 
-import mx.edu.utez.Estacionamiento.entity.*;
 import mx.edu.utez.Estacionamiento.model.Coche;
 import mx.edu.utez.Estacionamiento.model.RegistroEstancia;
 import mx.edu.utez.Estacionamiento.structures.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Repositorio que usa estructuras de datos personalizadas (Lista, Cola, Pila)
- * y sincroniza con la base de datos MySQL
+ * Trabaja completamente en memoria sin conexión a base de datos
  */
-@Repository
+@Repository("estacionamientoRepository")
 public class EstacionamientoRepository {
 
-    // Estructuras de datos personalizadas
-    public final ListaSimple<Coche> lugaresOcupados = new ListaSimple<>();
-    public final Cola<Coche> filaEspera = new Cola<>();
-    public final Pila<RegistroEstancia> historialSalidas = new Pila<>();
+    // ============================================
+    // ESTRUCTURAS DE DATOS PRINCIPALES
+    // ============================================
+    
+    // 1. LISTA SIMPLE: Almacenamiento secuencial de vehículos estacionados
+    private final ListaSimple<Coche> lugaresOcupados = new ListaSimple<>();
+    
+    // 2. ÁRBOL BINARIO: Búsqueda rápida O(log n) de vehículos por placa
+    private final ArbolBinario<Coche> arbolBusqueda = new ArbolBinario<>();
+    
+    // 3. COLA: Gestión FIFO de vehículos en espera
+    private final Cola<Coche> filaEspera = new Cola<>();
+    
+    // 4. COLA CIRCULAR: Rotación de espacios disponibles
+    private ColaCircular<Coche> espaciosRotativos;
+    
+    // 5. PILA: Historial de salidas (LIFO - último en salir primero)
+    private final Pila<RegistroEstancia> historialSalidas = new Pila<>();
+    
+    // 6. LISTA DOBLE: Historial con navegación bidireccional
+    private final ListaDoble<RegistroEstancia> historialNavegable = new ListaDoble<>();
+    
+    // 7. ARREGLO DINÁMICO: Estadísticas y reportes temporales
+    private final ArregloDinamico<RegistroEstancia> estadisticasTemporales = new ArregloDinamico<>();
+    
+    /**
+     * Getters para acceder a las estructuras (necesarios para proxies CGLIB de Spring)
+     */
+    public ListaSimple<Coche> getLugaresOcupados() {
+        return lugaresOcupados;
+    }
+    
+    public ArbolBinario<Coche> getArbolBusqueda() {
+        return arbolBusqueda;
+    }
+    
+    public Cola<Coche> getFilaEspera() {
+        return filaEspera;
+    }
+    
+    public ColaCircular<Coche> getEspaciosRotativos() {
+        return espaciosRotativos;
+    }
+    
+    public Pila<RegistroEstancia> getHistorialSalidas() {
+        return historialSalidas;
+    }
+    
+    public ListaDoble<RegistroEstancia> getHistorialNavegable() {
+        return historialNavegable;
+    }
+    
+    public ArregloDinamico<RegistroEstancia> getEstadisticasTemporales() {
+        return estadisticasTemporales;
+    }
+    
+    /**
+     * Verifica que las estructuras estén inicializadas después de la inyección de dependencias
+     */
+    @PostConstruct
+    public void verificarInicializacion() {
+        System.out.println("\n═══════════════════════════════════════════════════════════");
+        System.out.println("🔧 VERIFICACIÓN DE ESTRUCTURAS DE DATOS");
+        System.out.println("═══════════════════════════════════════════════════════════");
+        
+        if (lugaresOcupados == null) {
+            throw new IllegalStateException("lugaresOcupados (ListaSimple) no está inicializado");
+        }
+        if (arbolBusqueda == null) {
+            throw new IllegalStateException("arbolBusqueda (ArbolBinario) no está inicializado");
+        }
+        if (filaEspera == null) {
+            throw new IllegalStateException("filaEspera (Cola) no está inicializado");
+        }
+        if (historialSalidas == null) {
+            throw new IllegalStateException("historialSalidas (Pila) no está inicializado");
+        }
+        if (historialNavegable == null) {
+            throw new IllegalStateException("historialNavegable (ListaDoble) no está inicializado");
+        }
+        if (estadisticasTemporales == null) {
+            throw new IllegalStateException("estadisticasTemporales (ArregloDinamico) no está inicializado");
+        }
+        
+        // Inicializar ColaCircular con capacidad por defecto
+        if (espaciosRotativos == null) {
+            espaciosRotativos = new ColaCircular<>(CAPACIDAD_MAXIMA);
+            System.out.println("   ✅ ColaCircular inicializada con capacidad: " + CAPACIDAD_MAXIMA);
+        }
+        
+        System.out.println("✅ Estructuras básicas inicializadas correctamente:");
+        System.out.println("   1. ListaSimple<Coche> - Lugares ocupados");
+        System.out.println("   2. ArbolBinario<Coche> - Búsqueda rápida O(log n)");
+        System.out.println("   3. Cola<Coche> - Fila de espera (FIFO)");
+        System.out.println("   4. ColaCircular<Coche> - Rotación de espacios");
+        System.out.println("   5. Pila<RegistroEstancia> - Historial LIFO");
+        System.out.println("   6. ListaDoble<RegistroEstancia> - Historial navegable");
+        System.out.println("   7. ArregloDinamico<RegistroEstancia> - Estadísticas temporales");
+        System.out.println("═══════════════════════════════════════════════════════════\n");
+    }
 
     // Capacidad máxima del estacionamiento
-    public final int CAPACIDAD_MAXIMA = 20;
+    public int CAPACIDAD_MAXIMA = 20;
 
-    // Repositorios JPA para sincronización con BD
-    @Autowired
-    private VehiculoEstacionadoRepository vehiculoEstacionadoRepository;
-    
-    @Autowired
-    private VehiculoEnEsperaRepository vehiculoEnEsperaRepository;
-    
-    @Autowired
-    private HistorialSalidaRepository historialSalidaRepository;
-    
-    @Autowired
-    private ConfiguracionEstacionamientoRepository configuracionRepository;
-    
-    @Autowired
-    private TarifaRepository tarifaRepository;
-
-    // Configuración de tarifas (se carga desde BD)
+    // Configuración de tarifas (valores por defecto)
     public double tarifaPorMinuto = 1.5;
     public double tarifa1Minuto = 1.5;
     public double tarifa0_1Hora = 5.0;
@@ -55,224 +129,34 @@ public class EstacionamientoRepository {
     public double tarifaTicketPerdido = 0.0;
 
     /**
-     * Carga los datos desde la base de datos a las estructuras en memoria
-     * Se ejecuta al iniciar la aplicación
+     * Inicializa las estructuras con valores por defecto
+     * Los datos se cargan desde localStorage en el frontend
      */
-    @Transactional
-    public void cargarDesdeBaseDatos() {
+    @PostConstruct
+    public void inicializar() {
         System.out.println("\n═══════════════════════════════════════════════════════════");
-        System.out.println("📥 PROCESO: CARGAR DATOS DESDE BASE DE DATOS");
+        System.out.println("📥 PROCESO: INICIALIZACIÓN DE ESTRUCTURAS EN MEMORIA");
         System.out.println("═══════════════════════════════════════════════════════════");
         
-        // Limpiar estructuras
+        // Limpiar todas las estructuras
         System.out.println("🗑️  Limpiando estructuras en memoria...");
         lugaresOcupados.limpiar();
+        arbolBusqueda.limpiar();
         filaEspera.BorrarCola();
+        if (espaciosRotativos != null) {
+            espaciosRotativos.borrarCola();
+        }
         historialSalidas.LimpiarPila();
-        System.out.println("✅ Estructuras limpiadas.");
-
-        // Cargar vehículos estacionados desde BD a ListaSimple
-        System.out.println("\n📋 Cargando vehículos estacionados desde BD a ListaSimple...");
-        List<VehiculoEstacionado> vehiculosBD = vehiculoEstacionadoRepository.findAll();
-        System.out.println("   - Vehículos encontrados en BD: " + vehiculosBD.size());
-        for (VehiculoEstacionado v : vehiculosBD) {
-            Coche coche = new Coche(v.getPlaca(), convertToDate(v.getHoraEntrada()));
-            lugaresOcupados.insertarAlFinal(coche);
-            System.out.println("   ✅ Vehículo " + v.getPlaca() + " agregado a ListaSimple");
-        }
-        System.out.println("✅ ListaSimple cargada. Tamaño: " + lugaresOcupados.getTamano());
-
-        // Cargar fila de espera desde BD a Cola (ordenados por posición)
-        System.out.println("\n📋 Cargando fila de espera desde BD a Cola...");
-        List<VehiculoEnEspera> esperaBD = vehiculoEnEsperaRepository.findAllOrderByPosicion();
-        System.out.println("   - Vehículos en espera encontrados en BD: " + esperaBD.size());
-        for (VehiculoEnEspera v : esperaBD) {
-            Coche coche = new Coche(v.getPlaca(), convertToDate(v.getHoraEntrada()));
-            filaEspera.Agregar(coche);
-            System.out.println("   ✅ Vehículo " + v.getPlaca() + " (posición " + v.getPosicion() + ") agregado a Cola");
-        }
-        System.out.println("✅ Cola cargada. Tamaño: " + filaEspera.Tamano());
-
-        // Cargar historial desde BD a Pila (orden inverso para mantener LIFO)
-        System.out.println("\n📋 Cargando historial desde BD a Pila (LIFO)...");
-        List<HistorialSalida> historialBD = historialSalidaRepository.findAllOrderByFechaCreacionDesc();
-        System.out.println("   - Registros de historial encontrados en BD: " + historialBD.size());
-        for (HistorialSalida h : historialBD) {
-            RegistroEstancia registro = new RegistroEstancia(
-                h.getPlaca(),
-                convertToDate(h.getHoraEntrada()),
-                convertToDate(h.getHoraSalida()),
-                h.getTarifaPagada().doubleValue()
-            );
-            historialSalidas.Insertar(registro);
-            System.out.println("   ✅ Registro de " + h.getPlaca() + " agregado a Pila");
-        }
-        System.out.println("✅ Pila cargada. Tamaño: " + historialSalidas.TamanioPila());
-
-        // Cargar configuración de tarifas
-        System.out.println("\n💰 Cargando configuración de tarifas...");
-        cargarTarifas();
-        System.out.println("   ✅ Tarifa por minuto: $" + tarifaPorMinuto);
-        System.out.println("   ✅ Tarifa 1 minuto: $" + tarifa1Minuto);
-        System.out.println("   ✅ Tarifa 0-1 hora: $" + tarifa0_1Hora);
-        System.out.println("   ✅ Tarifa 1-2 horas: $" + tarifa1_2Horas);
-        System.out.println("   ✅ Tarifa 2+ horas: $" + tarifa2MasHoras);
+        historialNavegable.limpiar();
+        estadisticasTemporales.limpiar();
+        System.out.println("✅ Todas las estructuras limpiadas.");
         
-        System.out.println("\n✅ PROCESO COMPLETADO: Datos cargados desde BD correctamente.");
+        // Inicializar ColaCircular con la capacidad máxima
+        espaciosRotativos = new ColaCircular<>(CAPACIDAD_MAXIMA);
+        System.out.println("   ✅ ColaCircular inicializada con capacidad: " + CAPACIDAD_MAXIMA);
+        
+        System.out.println("\n✅ PROCESO COMPLETADO: Estructuras inicializadas correctamente.");
+        System.out.println("   💡 Los datos se gestionan desde localStorage en el frontend.");
         System.out.println("═══════════════════════════════════════════════════════════\n");
     }
-
-    /**
-     * Sincroniza un vehículo estacionado desde la estructura a la BD
-     */
-    @Transactional
-    public void sincronizarVehiculoEstacionado(Coche coche, boolean agregar) {
-        if (agregar) {
-            System.out.println("   💾 Guardando vehículo " + coche.getPlaca() + " en BD...");
-            VehiculoEstacionado vehiculo = new VehiculoEstacionado(
-                coche.getPlaca(),
-                convertToLocalDateTime(coche.getHoraEntrada())
-            );
-            vehiculoEstacionadoRepository.save(vehiculo);
-            System.out.println("   ✅ Vehículo guardado en BD.");
-        } else {
-            System.out.println("   💾 Eliminando vehículo " + coche.getPlaca() + " de BD...");
-            vehiculoEstacionadoRepository.findByPlaca(coche.getPlaca())
-                .ifPresent(v -> {
-                    vehiculoEstacionadoRepository.delete(v);
-                    System.out.println("   ✅ Vehículo eliminado de BD.");
-                });
-        }
-    }
-
-    /**
-     * Sincroniza la fila de espera completa con la BD
-     */
-    @Transactional
-    public void sincronizarFilaEspera() {
-        System.out.println("   💾 Sincronizando Cola completa con BD...");
-        // Eliminar todos los registros de espera en BD
-        vehiculoEnEsperaRepository.deleteAll();
-        System.out.println("   🗑️  Registros anteriores eliminados de BD.");
-        
-        // Insertar todos los vehículos de la cola en BD
-        NodoCola<Coche> actual = filaEspera.getInicio();
-        int posicion = 1;
-        int contador = 0;
-        while (actual != null) {
-            VehiculoEnEspera vehiculo = new VehiculoEnEspera(
-                actual.getDato().getPlaca(),
-                convertToLocalDateTime(actual.getDato().getHoraEntrada()),
-                posicion
-            );
-            vehiculoEnEsperaRepository.save(vehiculo);
-            System.out.println("   ✅ Vehículo " + actual.getDato().getPlaca() + " (posición " + posicion + ") guardado en BD");
-            actual = actual.getSiguiente();
-            posicion++;
-            contador++;
-        }
-        System.out.println("   ✅ Cola sincronizada. Total de vehículos guardados: " + contador);
-    }
-
-    /**
-     * Sincroniza un registro de historial desde la estructura a la BD
-     */
-    @Transactional
-    public void sincronizarHistorial(RegistroEstancia registro) {
-        System.out.println("   💾 Guardando registro de historial en BD...");
-        HistorialSalida historial = new HistorialSalida(
-            registro.getPlaca(),
-            convertToLocalDateTime(registro.getHoraEntrada()),
-            convertToLocalDateTime(registro.getHoraSalida()),
-            java.math.BigDecimal.valueOf(registro.getTarifaPagada()),
-            null
-        );
-        historialSalidaRepository.save(historial);
-        System.out.println("   ✅ Registro de " + registro.getPlaca() + " guardado en BD (Tarifa: $" + registro.getTarifaPagada() + ")");
-    }
-
-    /**
-     * Limpia el historial en la base de datos
-     */
-    @Transactional
-    public void limpiarHistorialBD() {
-        long cantidadAntes = historialSalidaRepository.count();
-        System.out.println("   💾 Eliminando " + cantidadAntes + " registros de historial en BD...");
-        historialSalidaRepository.deleteAll();
-        System.out.println("   ✅ Historial de BD limpiado.");
-    }
-
-    /**
-     * Carga las tarifas desde la BD
-     */
-    private void cargarTarifas() {
-        tarifaRepository.findFirstByOrderByIdDesc().ifPresent(tarifa -> {
-            tarifaPorMinuto = tarifa.getTarifaPorMinuto().doubleValue();
-            tarifa1Minuto = tarifa.getTarifa1Minuto() != null ? tarifa.getTarifa1Minuto().doubleValue() : 1.5;
-            tarifa0_1Hora = tarifa.getTarifa0_1Hora().doubleValue();
-            tarifa1_2Horas = tarifa.getTarifa1_2Horas().doubleValue();
-            tarifa2MasHoras = tarifa.getTarifa2MasHoras().doubleValue();
-            tarifaMaximaDiaria = tarifa.getTarifaMaximaDiaria().doubleValue();
-            tarifaMaximaSemanal = tarifa.getTarifaMaximaSemanal().doubleValue();
-            tarifaTicketPerdido = tarifa.getTarifaTicketPerdido().doubleValue();
-        });
-    }
-
-    /**
-     * Actualiza las tarifas en la BD
-     */
-    @Transactional
-    public void actualizarTarifasEnBD() {
-        System.out.println("   💾 Obteniendo registro de tarifas de BD...");
-        Tarifa tarifa = tarifaRepository.findFirstByOrderByIdDesc().orElse(new Tarifa());
-        
-        if (tarifa.getId() == null) {
-            System.out.println("   ⚠️  No se encontró registro de tarifas. Creando nuevo registro...");
-        } else {
-            System.out.println("   ✅ Registro de tarifas encontrado (ID: " + tarifa.getId() + "). Actualizando...");
-        }
-        
-        System.out.println("   📝 Estableciendo valores de tarifas:");
-        System.out.println("      - tarifaPorMinuto: $" + tarifaPorMinuto);
-        System.out.println("      - tarifa1Minuto: $" + tarifa1Minuto);
-        System.out.println("      - tarifa0_1Hora: $" + tarifa0_1Hora);
-        System.out.println("      - tarifa1_2Horas: $" + tarifa1_2Horas);
-        System.out.println("      - tarifa2MasHoras: $" + tarifa2MasHoras);
-        System.out.println("      - tarifaMaximaDiaria: $" + tarifaMaximaDiaria);
-        System.out.println("      - tarifaMaximaSemanal: $" + tarifaMaximaSemanal);
-        System.out.println("      - tarifaTicketPerdido: $" + tarifaTicketPerdido);
-        
-        tarifa.setTarifaPorMinuto(java.math.BigDecimal.valueOf(tarifaPorMinuto));
-        tarifa.setTarifa1Minuto(java.math.BigDecimal.valueOf(tarifa1Minuto));
-        tarifa.setTarifa0_1Hora(java.math.BigDecimal.valueOf(tarifa0_1Hora));
-        tarifa.setTarifa1_2Horas(java.math.BigDecimal.valueOf(tarifa1_2Horas));
-        tarifa.setTarifa2MasHoras(java.math.BigDecimal.valueOf(tarifa2MasHoras));
-        tarifa.setTarifaMaximaDiaria(java.math.BigDecimal.valueOf(tarifaMaximaDiaria));
-        tarifa.setTarifaMaximaSemanal(java.math.BigDecimal.valueOf(tarifaMaximaSemanal));
-        tarifa.setTarifaTicketPerdido(java.math.BigDecimal.valueOf(tarifaTicketPerdido));
-        
-        System.out.println("   💾 Guardando tarifas en BD...");
-        Tarifa tarifaGuardada = tarifaRepository.save(tarifa);
-        System.out.println("   ✅ Tarifas guardadas exitosamente (ID: " + tarifaGuardada.getId() + ")");
-        
-        // Verificar que se guardó correctamente
-        tarifaRepository.findFirstByOrderByIdDesc().ifPresent(t -> {
-            System.out.println("   ✅ Verificación: Tarifas en BD después de guardar:");
-            System.out.println("      - tarifaPorMinuto: $" + t.getTarifaPorMinuto());
-            System.out.println("      - tarifa1Minuto: $" + t.getTarifa1Minuto());
-            System.out.println("      - tarifa0_1Hora: $" + t.getTarifa0_1Hora());
-            System.out.println("      - tarifa1_2Horas: $" + t.getTarifa1_2Horas());
-            System.out.println("      - tarifa2MasHoras: $" + t.getTarifa2MasHoras());
-        });
-    }
-
-    // Métodos de conversión
-    private Date convertToDate(LocalDateTime localDateTime) {
-        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-    }
-
-    private LocalDateTime convertToLocalDateTime(Date date) {
-        return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-    }
 }
-

@@ -136,49 +136,6 @@
                   </div>
                 </div>
 
-                <!-- Método de Pago -->
-                <div class="form-group">
-                  <label class="form-label">
-                    Método de Pago
-                  </label>
-                  <fieldset style="border: none; padding: 0; margin: 0;">
-                    <legend class="util-sr-only">Elija un método de pago</legend>
-                    <div class="app-flex app-flex-wrap app-gap-md">
-                      <label class="btn btn-secondary" style="flex: 1; min-width: 140px; cursor: pointer; position: relative; display: inline-flex; align-items: center; justify-content: center;">
-                        <input
-                          type="radio"
-                          name="metodo-pago"
-                          value="tarjeta"
-                          class="util-sr-only"
-                          aria-label="Pagar con tarjeta de crédito"
-                        />
-                        <span>Tarjeta</span>
-                      </label>
-                      <label class="btn btn-secondary" style="flex: 1; min-width: 140px; cursor: pointer; position: relative; display: inline-flex; align-items: center; justify-content: center;">
-                        <input
-                          type="radio"
-                          name="metodo-pago"
-                          value="efectivo"
-                          checked
-                          class="util-sr-only"
-                          aria-label="Pagar con efectivo"
-                        />
-                        <span>Efectivo</span>
-                      </label>
-                      <label class="btn btn-secondary" style="flex: 1; min-width: 140px; cursor: pointer; position: relative; display: inline-flex; align-items: center; justify-content: center;">
-                        <input
-                          type="radio"
-                          name="metodo-pago"
-                          value="app"
-                          class="util-sr-only"
-                          aria-label="Pagar con aplicación móvil"
-                        />
-                        <span>App Móvil</span>
-                      </label>
-                    </div>
-                  </fieldset>
-                </div>
-
                 <!-- Botón: Procesar Pago y Salida -->
                 <div class="form-group" style="margin-bottom: 0;">
                   <button
@@ -201,6 +158,7 @@
     <!-- Scripts JavaScript - Orden de carga importante -->
     <script src="JS/config.js"></script>
     <script src="JS/common.js"></script>
+    <script src="JS/storage.js"></script>
     <script src="JS/salida.js"></script>
   </body>
 </html>

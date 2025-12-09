@@ -6,9 +6,11 @@ import mx.edu.utez.Estacionamiento.repository.EstacionamientoRepository;
 import mx.edu.utez.Estacionamiento.structures.NodoListaSimple;
 import mx.edu.utez.Estacionamiento.structures.NodoCola;
 import mx.edu.utez.Estacionamiento.structures.NodoPila;
+import mx.edu.utez.Estacionamiento.structures.ListaSimple;
+import mx.edu.utez.Estacionamiento.structures.Cola;
+import mx.edu.utez.Estacionamiento.structures.Pila;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -18,16 +20,76 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@org.springframework.context.annotation.DependsOn("estacionamientoRepository")
 public class EstacionamientoService {
 
+    private final EstacionamientoRepository repository;
+
+    // Inyección por constructor para asegurar inicialización
     @Autowired
-    private EstacionamientoRepository repository;
+    public EstacionamientoService(EstacionamientoRepository repository) {
+        System.out.println("🔧 EstacionamientoService: Iniciando construcción del servicio...");
+        if (repository == null) {
+            System.err.println("❌ ERROR: EstacionamientoRepository es null");
+            throw new IllegalStateException("EstacionamientoRepository no puede ser null");
+        }
+        System.out.println("   ✅ Repositorio recibido: " + repository.getClass().getName());
+        
+        // Usar getters en lugar de acceso directo a campos para evitar problemas con proxies CGLIB
+        ListaSimple<Coche> lugaresOcupados = repository.getLugaresOcupados();
+        if (lugaresOcupados == null) {
+            System.err.println("❌ ERROR: lugaresOcupados es null");
+            System.err.println("   Tipo del repositorio: " + repository.getClass().getName());
+            throw new IllegalStateException("lugaresOcupados no puede ser null en EstacionamientoRepository");
+        }
+        System.out.println("   ✅ lugaresOcupados inicializado: " + lugaresOcupados.getClass().getName());
+        
+        Cola<Coche> filaEspera = repository.getFilaEspera();
+        if (filaEspera == null) {
+            System.err.println("❌ ERROR: filaEspera es null");
+            throw new IllegalStateException("filaEspera no puede ser null en EstacionamientoRepository");
+        }
+        System.out.println("   ✅ filaEspera inicializado: " + filaEspera.getClass().getName());
+        
+        Pila<RegistroEstancia> historialSalidas = repository.getHistorialSalidas();
+        if (historialSalidas == null) {
+            System.err.println("❌ ERROR: historialSalidas es null");
+            throw new IllegalStateException("historialSalidas no puede ser null en EstacionamientoRepository");
+        }
+        System.out.println("   ✅ historialSalidas inicializado: " + historialSalidas.getClass().getName());
+        
+        this.repository = repository;
+        System.out.println("✅ EstacionamientoService: Repositorio inicializado correctamente");
+    }
+
+    /**
+     * Verifica que el repositorio y sus estructuras estén inicializados
+     */
+    private void verificarInicializacion() {
+        if (repository == null) {
+            System.err.println("❌ ERROR CRÍTICO: El repositorio no está inicializado.");
+            throw new IllegalStateException("El repositorio no está inicializado. Verifique la conexión a la base de datos.");
+        }
+        // Usar getters para evitar problemas con proxies CGLIB
+        if (repository.getLugaresOcupados() == null) {
+            System.err.println("❌ ERROR CRÍTICO: La estructura lugaresOcupados es null.");
+            System.err.println("   Tipo del repositorio: " + repository.getClass().getName());
+            throw new IllegalStateException("La estructura lugaresOcupados no está inicializada.");
+        }
+        if (repository.getFilaEspera() == null) {
+            System.err.println("❌ ERROR CRÍTICO: La estructura filaEspera es null.");
+            throw new IllegalStateException("La estructura filaEspera no está inicializada.");
+        }
+        if (repository.getHistorialSalidas() == null) {
+            System.err.println("❌ ERROR CRÍTICO: La estructura historialSalidas es null.");
+            throw new IllegalStateException("La estructura historialSalidas no está inicializada.");
+        }
+    }
 
     /**
      * Lógica para registrar la entrada de un coche
      * Usa ListaSimple y Cola, luego sincroniza con BD
      */
-    @Transactional
     public String registrarEntrada(String placa) {
         System.out.println("\n═══════════════════════════════════════════════════════════");
         System.out.println("🚗 PROCESO: REGISTRAR ENTRADA DE VEHÍCULO");
@@ -42,10 +104,13 @@ public class EstacionamientoService {
         final String placaNormalizada = placa.trim().toUpperCase();
         System.out.println("📋 Placa recibida: " + placaNormalizada);
         
+        // Verificar inicialización
+        verificarInicializacion();
+        
         // Verificar si ya está estacionado (usando ListaSimple)
         System.out.println("🔍 Verificando si el vehículo ya está estacionado...");
         Coche cocheBusqueda = new Coche(placaNormalizada);
-        int indice = repository.lugaresOcupados.buscarIndice(cocheBusqueda);
+        int indice = repository.getLugaresOcupados().buscarIndice(cocheBusqueda);
         if (indice != -1) {
             System.out.println("❌ ERROR: El coche con placa " + placaNormalizada + " ya está dentro (índice: " + indice + ").");
             return "ERROR: El coche con placa " + placaNormalizada + " ya está dentro.";
@@ -56,25 +121,41 @@ public class EstacionamientoService {
         System.out.println("📅 Hora de entrada: " + nuevoCoche.getHoraEntrada());
 
         // Comprobamos si hay lugares limitados (usando ListaSimple)
-        int lugaresOcupados = repository.lugaresOcupados.getTamano();
+        int lugaresOcupados = repository.getLugaresOcupados().getTamano();
         int capacidadMaxima = repository.CAPACIDAD_MAXIMA;
+        
+        // Validar capacidad máxima
+        if (capacidadMaxima <= 0) {
+            System.err.println("⚠️  ADVERTENCIA: CAPACIDAD_MAXIMA es inválida (" + capacidadMaxima + "). Usando valor por defecto: 20");
+            capacidadMaxima = 20;
+            repository.CAPACIDAD_MAXIMA = 20;
+        }
+        
         System.out.println("📊 Estado actual:");
         System.out.println("   - Lugares ocupados: " + lugaresOcupados);
         System.out.println("   - Capacidad máxima: " + capacidadMaxima);
-        System.out.println("   - Lugares disponibles: " + (capacidadMaxima - lugaresOcupados));
+        int disponibles = capacidadMaxima - lugaresOcupados;
+        System.out.println("   - Lugares disponibles: " + (disponibles >= 0 ? disponibles : 0));
         
         if (lugaresOcupados < capacidadMaxima) {
-            // Agregar a ListaSimple
-            System.out.println("\n📝 Agregando vehículo a ListaSimple (lugares ocupados)...");
-            repository.lugaresOcupados.insertarAlFinal(nuevoCoche);
-            System.out.println("✅ Vehículo agregado a ListaSimple. Tamaño actual: " + repository.lugaresOcupados.getTamano());
+            // Agregar a múltiples estructuras de datos
+            System.out.println("\n📝 Agregando vehículo a estructuras de datos...");
             
-            // Sincronizar con BD
-            System.out.println("💾 Sincronizando con base de datos...");
-            repository.sincronizarVehiculoEstacionado(nuevoCoche, true);
-            System.out.println("✅ Sincronización completada.");
+            // 1. ListaSimple (almacenamiento secuencial)
+            repository.getLugaresOcupados().insertarAlFinal(nuevoCoche);
+            System.out.println("   ✅ Agregado a ListaSimple. Tamaño: " + repository.getLugaresOcupados().getTamano());
             
-            int lugaresDisponibles = capacidadMaxima - repository.lugaresOcupados.getTamano();
+            // 2. Árbol Binario (búsqueda rápida O(log n))
+            repository.getArbolBusqueda().insertar(nuevoCoche);
+            System.out.println("   ✅ Agregado a ÁrbolBinario. Tamaño: " + repository.getArbolBusqueda().getTamano());
+            
+            // 3. Cola Circular (rotación de espacios)
+            if (repository.getEspaciosRotativos() != null && !repository.getEspaciosRotativos().colaLlena()) {
+                repository.getEspaciosRotativos().insertar(nuevoCoche);
+                System.out.println("   ✅ Agregado a ColaCircular. Tamaño: " + repository.getEspaciosRotativos().obtenerTamano());
+            }
+            
+            int lugaresDisponibles = Math.max(0, capacidadMaxima - repository.getLugaresOcupados().getTamano());
             System.out.println("✅ PROCESO COMPLETADO: Coche " + placaNormalizada + " estacionado.");
             System.out.println("   Lugares disponibles: " + lugaresDisponibles);
             System.out.println("═══════════════════════════════════════════════════════════\n");
@@ -82,14 +163,10 @@ public class EstacionamientoService {
         } else {
             // Si está lleno, agregar a la Cola (FIFO)
             System.out.println("\n⚠️  Estacionamiento lleno. Agregando a Cola de espera (FIFO)...");
-            int tamanoColaAntes = repository.filaEspera.Tamano();
-            repository.filaEspera.Agregar(nuevoCoche);
-            System.out.println("✅ Vehículo agregado a Cola. Tamaño de cola: " + tamanoColaAntes + " → " + repository.filaEspera.Tamano());
+            int tamanoColaAntes = repository.getFilaEspera().Tamano();
+            repository.getFilaEspera().Agregar(nuevoCoche);
+            System.out.println("✅ Vehículo agregado a Cola. Tamaño de cola: " + tamanoColaAntes + " → " + repository.getFilaEspera().Tamano());
             
-            // Sincronizar cola completa con BD
-            System.out.println("💾 Sincronizando cola completa con base de datos...");
-            repository.sincronizarFilaEspera();
-            System.out.println("✅ Sincronización completada.");
             System.out.println("✅ PROCESO COMPLETADO: Coche " + placaNormalizada + " agregado a la fila de espera.");
             System.out.println("═══════════════════════════════════════════════════════════\n");
             return "Estacionamiento lleno. Coche " + placaNormalizada + " agregado a la fila de espera.";
@@ -99,9 +176,10 @@ public class EstacionamientoService {
     /**
      * Lógica para registrar la salida de un coche
      * Usa ListaSimple, Pila y Cola, luego sincroniza con BD
+     * Retorna un Map con información detallada de la salida
      */
-    @Transactional
-    public String registrarSalida(String placa) {
+    public Map<String, Object> registrarSalida(String placa) {
+        Map<String, Object> resultado = new HashMap<>();
         System.out.println("\n═══════════════════════════════════════════════════════════");
         System.out.println("🚪 PROCESO: REGISTRAR SALIDA DE VEHÍCULO");
         System.out.println("═══════════════════════════════════════════════════════════");
@@ -109,102 +187,196 @@ public class EstacionamientoService {
         // Validar placa
         if (placa == null || placa.trim().isEmpty()) {
             System.out.println("❌ ERROR: La placa no puede estar vacía.");
-            return "ERROR: La placa no puede estar vacía.";
+            resultado.put("exito", false);
+            resultado.put("mensaje", "ERROR: La placa no puede estar vacía.");
+            return resultado;
         }
         
         final String placaNormalizada = placa.trim().toUpperCase();
         System.out.println("📋 Placa recibida: " + placaNormalizada);
 
-        // 1. Buscar el coche en la ListaSimple (usando nodos)
-        System.out.println("🔍 Buscando vehículo en ListaSimple (recorriendo nodos)...");
+        // 1. Buscar el coche usando Árbol Binario (búsqueda rápida O(log n))
+        System.out.println("🔍 Buscando vehículo usando Árbol Binario (búsqueda O(log n))...");
         Coche cocheBusqueda = new Coche(placaNormalizada);
-        Coche cocheEncontrado = null;
-        NodoListaSimple<Coche> actual = repository.lugaresOcupados.getHead();
-        int posicion = 0;
-        while (actual != null) {
-            if (actual.getDato().equals(cocheBusqueda)) {
-                cocheEncontrado = actual.getDato();
-                System.out.println("✅ Vehículo encontrado en posición " + posicion + " de la ListaSimple");
-                break;
+        Coche cocheEncontrado = repository.getArbolBusqueda().buscar(cocheBusqueda);
+        
+        if (cocheEncontrado != null) {
+            System.out.println("✅ Vehículo encontrado en Árbol Binario: " + cocheEncontrado.getPlaca());
+            // También buscar en ListaSimple para obtener la posición
+            int posicion = repository.getLugaresOcupados().buscarIndice(cocheEncontrado);
+            if (posicion != -1) {
+                System.out.println("   - Posición en ListaSimple: " + posicion);
             }
-            actual = actual.getEnlace();
-            posicion++;
         }
 
         if (cocheEncontrado == null) {
             System.out.println("❌ ERROR: El coche con placa " + placaNormalizada + " no se encuentra estacionado.");
-            return "ERROR: El coche con placa " + placaNormalizada + " no se encuentra estacionado.";
+            resultado.put("exito", false);
+            resultado.put("mensaje", "ERROR: El coche con placa " + placaNormalizada + " no se encuentra estacionado.");
+            return resultado;
         }
 
         System.out.println("📅 Hora de entrada del vehículo: " + cocheEncontrado.getHoraEntrada());
 
-        // 2. Eliminar el coche de la ListaSimple
-        System.out.println("\n🗑️  Eliminando vehículo de ListaSimple...");
-        int tamanoAntes = repository.lugaresOcupados.getTamano();
-        boolean eliminado = repository.lugaresOcupados.eliminarPorValor(cocheEncontrado);
-        if (!eliminado) {
-            System.out.println("❌ ERROR: No se pudo eliminar el coche " + placaNormalizada);
-            return "ERROR: No se pudo eliminar el coche " + placaNormalizada;
+        // 2. Eliminar el coche de todas las estructuras
+        System.out.println("\n🗑️  Eliminando vehículo de estructuras de datos...");
+        int tamanoAntes = repository.getLugaresOcupados().getTamano();
+        
+        // Eliminar de ListaSimple
+        boolean eliminadoLista = repository.getLugaresOcupados().eliminarPorValor(cocheEncontrado);
+        System.out.println("   - ListaSimple: " + (eliminadoLista ? "✅ Eliminado" : "❌ No encontrado"));
+        
+        // Eliminar de Árbol Binario
+        boolean eliminadoArbol = repository.getArbolBusqueda().eliminar(cocheEncontrado);
+        System.out.println("   - ÁrbolBinario: " + (eliminadoArbol ? "✅ Eliminado" : "❌ No encontrado"));
+        
+        if (!eliminadoLista && !eliminadoArbol) {
+            System.out.println("❌ ERROR: No se pudo eliminar el coche " + placaNormalizada + " de ninguna estructura");
+            resultado.put("exito", false);
+            resultado.put("mensaje", "ERROR: No se pudo eliminar el coche " + placaNormalizada);
+            return resultado;
         }
-        System.out.println("✅ Vehículo eliminado de ListaSimple. Tamaño: " + tamanoAntes + " → " + repository.lugaresOcupados.getTamano());
+        System.out.println("✅ Vehículo eliminado de estructuras. ListaSimple: " + tamanoAntes + " → " + repository.getLugaresOcupados().getTamano());
 
         // 3. Calcular tarifa usando la tarifa configurada
         System.out.println("\n💰 Calculando tarifa...");
         Date horaSalida = new Date();
-        long diffMs = horaSalida.getTime() - cocheEncontrado.getHoraEntrada().getTime();
+        Date horaEntrada = cocheEncontrado.getHoraEntrada();
+        System.out.println("   - Hora de entrada: " + horaEntrada);
+        System.out.println("   - Hora de salida: " + horaSalida);
+        
+        long diffMs = horaSalida.getTime() - horaEntrada.getTime();
+        System.out.println("   - Diferencia en milisegundos: " + diffMs);
+        
         long diffMinutos = TimeUnit.MILLISECONDS.toMinutes(diffMs);
+        System.out.println("   - Diferencia en minutos (antes de validación): " + diffMinutos);
+        
         if (diffMinutos < 1) {
             diffMinutos = 1;
         }
-        double tarifa = diffMinutos * repository.tarifaPorMinuto;
-        System.out.println("   - Tiempo de estancia: " + diffMinutos + " minutos");
-        System.out.println("   - Tarifa por minuto: $" + repository.tarifaPorMinuto);
+        long diffHoras = diffMinutos / 60;
+        long minutosRestantes = diffMinutos % 60;
+        
+        // Validar que tarifaPorMinuto tenga un valor válido
+        double tarifaPorMinutoUsar = repository.tarifaPorMinuto;
+        if (tarifaPorMinutoUsar <= 0) {
+            System.err.println("   ⚠️ ADVERTENCIA: tarifaPorMinuto es " + tarifaPorMinutoUsar + ". Usando valor por defecto: $1.5");
+            tarifaPorMinutoUsar = 1.5;
+            System.out.println("   ⚠️  Usando valor por defecto: $1.5");
+        }
+        
+        System.out.println("   - Tarifa por minuto configurada: $" + tarifaPorMinutoUsar);
+        System.out.println("   - Tipo de tarifaPorMinuto: " + tarifaPorMinutoUsar);
+        
+        double tarifaPorHora = tarifaPorMinutoUsar * 60;
+        double tarifa = diffMinutos * tarifaPorMinutoUsar;
+        
+        System.out.println("   - Tiempo de estancia: " + diffMinutos + " minutos (" + diffHoras + " horas y " + minutosRestantes + " minutos)");
+        System.out.println("   - Tarifa por minuto: $" + tarifaPorMinutoUsar);
+        System.out.println("   - Tarifa por hora: $" + tarifaPorHora);
+        System.out.println("   - Cálculo: " + diffMinutos + " minutos × $" + tarifaPorMinutoUsar + " = $" + tarifa);
         System.out.println("   - Total a pagar: $" + tarifa);
+        
+        // Validar que la tarifa no sea 0 o negativa
+        if (tarifa <= 0) {
+            System.err.println("   ⚠️ ADVERTENCIA: La tarifa calculada es " + tarifa + ". Verificando valores...");
+            System.err.println("      - diffMinutos: " + diffMinutos);
+            System.err.println("      - tarifaPorMinutoUsar: " + tarifaPorMinutoUsar);
+            System.err.println("      - Resultado del cálculo: " + (diffMinutos * tarifaPorMinutoUsar));
+            // Forzar un valor mínimo si la tarifa es 0 o negativa
+            if (tarifa <= 0) {
+                tarifa = diffMinutos * tarifaPorMinutoUsar;
+                if (tarifa <= 0) {
+                    tarifa = tarifaPorMinutoUsar; // Al menos cobrar 1 minuto
+                    System.err.println("      ⚠️  Tarifa forzada a mínimo: $" + tarifa);
+                }
+            }
+        }
 
-        // 4. Crear registro y guardarlo en la Pila (LIFO)
-        System.out.println("\n📝 Creando registro de salida y agregando a Pila (LIFO)...");
+        // 4. Crear registro y guardarlo en múltiples estructuras
+        System.out.println("\n📝 Creando registro de salida y agregando a estructuras...");
         RegistroEstancia registro = new RegistroEstancia(
             placaNormalizada,
             cocheEncontrado.getHoraEntrada(),
             horaSalida,
             tarifa
         );
-        int tamanoPilaAntes = repository.historialSalidas.TamanioPila();
-        repository.historialSalidas.Insertar(registro);
-        System.out.println("✅ Registro agregado a Pila. Tamaño de pila: " + tamanoPilaAntes + " → " + repository.historialSalidas.TamanioPila());
         
-        // Sincronizar con BD
-        System.out.println("💾 Sincronizando con base de datos...");
-        repository.sincronizarVehiculoEstacionado(cocheEncontrado, false);
-        repository.sincronizarHistorial(registro);
-        System.out.println("✅ Sincronización completada.");
-
+        // Agregar a Pila (LIFO - último en salir primero)
+        int tamanoPilaAntes = repository.getHistorialSalidas().TamanioPila();
+        repository.getHistorialSalidas().Insertar(registro);
+        System.out.println("   ✅ Agregado a Pila. Tamaño: " + tamanoPilaAntes + " → " + repository.getHistorialSalidas().TamanioPila());
+        
+        // Agregar a ListaDoble (navegación bidireccional)
+        repository.getHistorialNavegable().insertarAlFinal(registro);
+        System.out.println("   ✅ Agregado a ListaDoble. Tamaño: " + repository.getHistorialNavegable().getTamano());
+        
+        // Agregar a ArregloDinamico (estadísticas y reportes)
+        repository.getEstadisticasTemporales().agregar(registro);
+        System.out.println("   ✅ Agregado a ArregloDinamico. Tamaño: " + repository.getEstadisticasTemporales().getTamano());
+        
         String mensajeSalida = "Coche " + placaNormalizada + " salió. Tiempo: " + diffMinutos + " min. Total a pagar: $" + tarifa;
+        
+        // Agregar información detallada al resultado
+        resultado.put("exito", true);
+        resultado.put("mensaje", mensajeSalida);
+        resultado.put("placa", placaNormalizada);
+        resultado.put("horaEntrada", cocheEncontrado.getHoraEntrada());
+        resultado.put("horaSalida", horaSalida);
+        resultado.put("tiempoMinutos", diffMinutos);
+        resultado.put("tiempoHoras", diffHoras);
+        resultado.put("tiempoMinutosRestantes", minutosRestantes);
+        
+        // Asegurar que los valores numéricos se serialicen correctamente como Double
+        resultado.put("tarifaPorMinuto", Double.valueOf(tarifaPorMinutoUsar));
+        resultado.put("tarifaPorHora", Double.valueOf(tarifaPorHora));
+        resultado.put("tarifaTotal", Double.valueOf(tarifa));
+        
+        // Verificar que los valores se agregaron correctamente al Map
+        System.out.println("   - Verificación de valores en Map:");
+        System.out.println("      - tarifaPorMinuto en Map: " + resultado.get("tarifaPorMinuto"));
+        System.out.println("      - tarifaPorHora en Map: " + resultado.get("tarifaPorHora"));
+        System.out.println("      - tarifaTotal en Map: " + resultado.get("tarifaTotal"));
+        
+        // Log para depuración
+        System.out.println("📤 Enviando respuesta al frontend:");
+        System.out.println("   - Tiempo: " + diffHoras + " horas y " + minutosRestantes + " minutos (" + diffMinutos + " minutos total)");
+        System.out.println("   - Tarifa por minuto: $" + tarifaPorMinutoUsar);
+        System.out.println("   - Tarifa por hora: $" + tarifaPorHora);
+        System.out.println("   - Tarifa total: $" + tarifa);
+        System.out.println("   - Tipo de tarifaTotal: double (primitivo)");
+        System.out.println("   - Valor numérico de tarifaTotal: " + tarifa);
 
         // 5. Mover a alguien de la Cola de espera (FIFO) usando nodos
         System.out.println("\n🔄 Verificando si hay vehículos en Cola de espera...");
-        if (!repository.filaEspera.EstaVacia()) {
-            int tamanoColaAntes = repository.filaEspera.Tamano();
+        if (!repository.getFilaEspera().EstaVacia()) {
+            int tamanoColaAntes = repository.getFilaEspera().Tamano();
             System.out.println("   - Vehículos en espera: " + tamanoColaAntes);
             System.out.println("   - Quitando primer vehículo de la Cola (FIFO)...");
             
-            Coche cocheEnEspera = repository.filaEspera.Quitar();
+            Coche cocheEnEspera = repository.getFilaEspera().Quitar();
             if (cocheEnEspera != null) {
                 System.out.println("✅ Vehículo " + cocheEnEspera.getPlaca() + " quitado de la Cola.");
                 // Le asignamos una nueva hora de entrada
                 cocheEnEspera.setHoraEntrada(new Date());
                 System.out.println("📅 Nueva hora de entrada asignada: " + cocheEnEspera.getHoraEntrada());
                 
-                // Agregar a ListaSimple
-                System.out.println("📝 Agregando vehículo a ListaSimple...");
-                repository.lugaresOcupados.insertarAlFinal(cocheEnEspera);
-                System.out.println("✅ Vehículo agregado a ListaSimple. Tamaño actual: " + repository.lugaresOcupados.getTamano());
+                // Agregar a múltiples estructuras
+                System.out.println("📝 Agregando vehículo a estructuras de datos...");
                 
-                // Sincronizar con BD
-                System.out.println("💾 Sincronizando con base de datos...");
-                repository.sincronizarVehiculoEstacionado(cocheEnEspera, true);
-                repository.sincronizarFilaEspera();
-                System.out.println("✅ Sincronización completada.");
+                // 1. ListaSimple
+                repository.getLugaresOcupados().insertarAlFinal(cocheEnEspera);
+                System.out.println("   ✅ Agregado a ListaSimple. Tamaño: " + repository.getLugaresOcupados().getTamano());
+                
+                // 2. Árbol Binario
+                repository.getArbolBusqueda().insertar(cocheEnEspera);
+                System.out.println("   ✅ Agregado a ÁrbolBinario. Tamaño: " + repository.getArbolBusqueda().getTamano());
+                
+                // 3. Cola Circular
+                if (repository.getEspaciosRotativos() != null && !repository.getEspaciosRotativos().colaLlena()) {
+                    repository.getEspaciosRotativos().insertar(cocheEnEspera);
+                    System.out.println("   ✅ Agregado a ColaCircular. Tamaño: " + repository.getEspaciosRotativos().obtenerTamano());
+                }
                 
                 mensajeSalida += ". \nCoche " + cocheEnEspera.getPlaca() + " de la fila de espera ha sido estacionado.";
             }
@@ -212,42 +384,96 @@ public class EstacionamientoService {
             System.out.println("ℹ️  No hay vehículos en la Cola de espera.");
         }
 
+        // Actualizar el mensaje en el resultado si cambió
+        resultado.put("mensaje", mensajeSalida);
+        
         System.out.println("✅ PROCESO COMPLETADO: " + mensajeSalida);
         System.out.println("═══════════════════════════════════════════════════════════\n");
-        return mensajeSalida;
+        return resultado;
     }
 
     // Métodos para mostrar (usando estructuras personalizadas)
 
     public void mostrarCochesActuales() {
         System.out.println("--- COCHES ACTUALMENTE ESTACIONADOS ---");
-        repository.lugaresOcupados.mostrar();
+        repository.getLugaresOcupados().mostrar();
     }
 
     public void mostrarFilaEspera() {
         System.out.println("--- COCHES EN FILA DE ESPERA ---");
-        repository.filaEspera.Mostrar();
+        repository.getFilaEspera().Mostrar();
     }
 
     public void mostrarHistorialSalidas() {
         System.out.println("--- HISTORIAL DE SALIDAS (LIFO) ---");
-        repository.historialSalidas.MostrarPila();
+        repository.getHistorialSalidas().MostrarPila();
     }
 
     public int getLugaresOcupadosSize() {
-        return repository.lugaresOcupados.getTamano();
+        try {
+            verificarInicializacion();
+            return repository.getLugaresOcupados().getTamano();
+        } catch (Exception e) {
+            System.err.println("❌ ERROR en getLugaresOcupadosSize: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     public int getCapacidadMaxima() {
-        return repository.CAPACIDAD_MAXIMA;
+        try {
+            verificarInicializacion();
+            int capacidad = repository.CAPACIDAD_MAXIMA;
+            // Validar que la capacidad sea válida
+            if (capacidad <= 0) {
+                System.err.println("⚠️  ADVERTENCIA: CAPACIDAD_MAXIMA es inválida (" + capacidad + "). Usando valor por defecto: 20");
+                capacidad = 20;
+                repository.CAPACIDAD_MAXIMA = 20;
+            }
+            return capacidad;
+        } catch (Exception e) {
+            System.err.println("❌ ERROR en getCapacidadMaxima: " + e.getMessage());
+            return 20; // Valor por defecto
+        }
     }
 
     public int getLugaresDisponibles() {
-        return repository.CAPACIDAD_MAXIMA - repository.lugaresOcupados.getTamano();
+        try {
+            verificarInicializacion();
+            int capacidadMaxima = repository.CAPACIDAD_MAXIMA;
+            int lugaresOcupados = repository.getLugaresOcupados().getTamano();
+            
+            // Validar que la capacidad máxima sea válida
+            if (capacidadMaxima <= 0) {
+                System.err.println("⚠️  ADVERTENCIA: CAPACIDAD_MAXIMA es inválida (" + capacidadMaxima + "). Usando valor por defecto: 20");
+                capacidadMaxima = 20;
+                repository.CAPACIDAD_MAXIMA = 20;
+            }
+            
+            int disponibles = capacidadMaxima - lugaresOcupados;
+            
+            // Asegurar que nunca sea negativo
+            if (disponibles < 0) {
+                System.err.println("⚠️  ADVERTENCIA: Lugares disponibles negativo (" + disponibles + "). Capacidad: " + capacidadMaxima + ", Ocupados: " + lugaresOcupados);
+                return 0; // Retornar 0 en lugar de negativo
+            }
+            
+            return disponibles;
+        } catch (Exception e) {
+            System.err.println("❌ ERROR en getLugaresDisponibles: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     public int getFilaEsperaSize() {
-        return repository.filaEspera.Tamano();
+        try {
+            verificarInicializacion();
+            return repository.getFilaEspera().Tamano();
+        } catch (Exception e) {
+            System.err.println("❌ ERROR en getFilaEsperaSize: " + e.getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -255,10 +481,14 @@ public class EstacionamientoService {
      */
     public List<Coche> getVehiculosEnEspera() {
         List<Coche> lista = new ArrayList<>();
-        if (repository.filaEspera.EstaVacia()) {
+        if (repository == null || repository.getFilaEspera() == null) {
+            System.err.println("⚠️  ADVERTENCIA: repository o filaEspera es null");
             return lista;
         }
-        NodoCola<Coche> actual = repository.filaEspera.getInicio();
+        if (repository.getFilaEspera().EstaVacia()) {
+            return lista;
+        }
+        NodoCola<Coche> actual = repository.getFilaEspera().getInicio();
         while (actual != null) {
             lista.add(actual.getDato());
             actual = actual.getSiguiente();
@@ -271,7 +501,11 @@ public class EstacionamientoService {
      */
     public List<Coche> getCochesActuales() {
         List<Coche> lista = new ArrayList<>();
-        NodoListaSimple<Coche> actual = repository.lugaresOcupados.getHead();
+        if (repository == null || repository.getLugaresOcupados() == null) {
+            System.err.println("⚠️  ADVERTENCIA: repository o lugaresOcupados es null");
+            return lista;
+        }
+        NodoListaSimple<Coche> actual = repository.getLugaresOcupados().getHead();
         while (actual != null) {
             lista.add(actual.getDato());
             actual = actual.getEnlace();
@@ -302,19 +536,23 @@ public class EstacionamientoService {
         System.out.println("📋 Placa recibida: " + placaNormalizada);
         Coche cocheBusqueda = new Coche(placaNormalizada);
         
-        // Buscar el coche en la ListaSimple usando nodos
-        System.out.println("🔍 Buscando vehículo en ListaSimple (recorriendo nodos)...");
-        Coche cocheEncontrado = null;
-        NodoListaSimple<Coche> actual = repository.lugaresOcupados.getHead();
-        int posicion = 0;
-        while (actual != null) {
-            if (actual.getDato().equals(cocheBusqueda)) {
-                cocheEncontrado = actual.getDato();
-                System.out.println("✅ Vehículo encontrado en posición " + posicion + " de la ListaSimple");
-                break;
+        // Verificar inicialización
+        verificarInicializacion();
+        
+        // Verificar inicialización
+        verificarInicializacion();
+        
+        // Buscar el coche usando Árbol Binario (búsqueda rápida O(log n))
+        System.out.println("🔍 Buscando vehículo usando Árbol Binario (búsqueda O(log n))...");
+        Coche cocheEncontrado = repository.getArbolBusqueda().buscar(cocheBusqueda);
+        
+        if (cocheEncontrado != null) {
+            System.out.println("✅ Vehículo encontrado en Árbol Binario: " + cocheEncontrado.getPlaca());
+            // También obtener posición en ListaSimple para referencia
+            int posicion = repository.getLugaresOcupados().buscarIndice(cocheEncontrado);
+            if (posicion != -1) {
+                System.out.println("   - Posición en ListaSimple: " + posicion);
             }
-            actual = actual.getEnlace();
-            posicion++;
         }
 
         if (cocheEncontrado == null) {
@@ -365,10 +603,14 @@ public class EstacionamientoService {
      */
     public List<RegistroEstancia> getHistorialSalidas() {
         List<RegistroEstancia> lista = new ArrayList<>();
-        if (repository.historialSalidas.PilaVacia()) {
+        if (repository == null || repository.getHistorialSalidas() == null) {
+            System.err.println("⚠️  ADVERTENCIA: repository o historialSalidas es null");
             return lista;
         }
-        NodoPila<RegistroEstancia> actual = repository.historialSalidas.getCima();
+        if (repository.getHistorialSalidas().PilaVacia()) {
+            return lista;
+        }
+        NodoPila<RegistroEstancia> actual = repository.getHistorialSalidas().getCima();
         while (actual != null) {
             lista.add(actual.getValor());
             actual = actual.getSiguiente();
@@ -378,26 +620,31 @@ public class EstacionamientoService {
 
     /**
      * Limpia el historial de salidas
-     * Limpia la Pila y sincroniza con BD
+     * Limpia todas las estructuras de historial y sincroniza con BD
      */
-    @Transactional
     public void limpiarHistorial() {
         System.out.println("\n═══════════════════════════════════════════════════════════");
         System.out.println("🗑️  PROCESO: LIMPIAR HISTORIAL DE SALIDAS");
         System.out.println("═══════════════════════════════════════════════════════════");
         
-        int tamanoPilaAntes = repository.historialSalidas.TamanioPila();
-        System.out.println("📊 Tamaño de Pila antes de limpiar: " + tamanoPilaAntes);
+        int tamanoPilaAntes = repository.getHistorialSalidas().TamanioPila();
+        int tamanoListaDobleAntes = repository.getHistorialNavegable().getTamano();
+        int tamanoArregloAntes = repository.getEstadisticasTemporales().getTamano();
         
-        System.out.println("🗑️  Limpiando Pila...");
-        repository.historialSalidas.LimpiarPila();
-        System.out.println("✅ Pila limpiada.");
+        System.out.println("📊 Tamaños antes de limpiar:");
+        System.out.println("   - Pila: " + tamanoPilaAntes);
+        System.out.println("   - ListaDoble: " + tamanoListaDobleAntes);
+        System.out.println("   - ArregloDinamico: " + tamanoArregloAntes);
         
-        System.out.println("💾 Limpiando historial en base de datos...");
-        repository.limpiarHistorialBD();
-        System.out.println("✅ Historial de BD limpiado.");
+        System.out.println("\n🗑️  Limpiando estructuras de historial...");
+        repository.getHistorialSalidas().LimpiarPila();
+        System.out.println("   ✅ Pila limpiada.");
+        repository.getHistorialNavegable().limpiar();
+        System.out.println("   ✅ ListaDoble limpiada.");
+        repository.getEstadisticasTemporales().limpiar();
+        System.out.println("   ✅ ArregloDinamico limpiado.");
         
-        System.out.println("✅ PROCESO COMPLETADO: Historial limpiado correctamente.");
+        System.out.println("✅ PROCESO COMPLETADO: Todas las estructuras de historial limpiadas correctamente.");
         System.out.println("═══════════════════════════════════════════════════════════\n");
     }
 
@@ -422,7 +669,6 @@ public class EstacionamientoService {
      * Actualiza la configuración de tarifas
      * Actualiza en memoria y sincroniza con BD
      */
-    @Transactional
     public Map<String, Object> actualizarTarifas(Map<String, Object> nuevasTarifas) {
         System.out.println("\n═══════════════════════════════════════════════════════════");
         System.out.println("💰 PROCESO: ACTUALIZAR TARIFAS");
@@ -464,11 +710,6 @@ public class EstacionamientoService {
             repository.tarifaTicketPerdido = ((Number) nuevasTarifas.get("tarifaTicketPerdido")).doubleValue();
             System.out.println("   ✅ tarifaTicketPerdido: $" + repository.tarifaTicketPerdido);
         }
-        
-        // Sincronizar con BD
-        System.out.println("\n💾 Sincronizando tarifas con base de datos...");
-        repository.actualizarTarifasEnBD();
-        System.out.println("✅ Sincronización completada.");
         
         System.out.println("✅ PROCESO COMPLETADO: Tarifas actualizadas correctamente.");
         System.out.println("═══════════════════════════════════════════════════════════\n");
