@@ -118,15 +118,8 @@ public class EstacionamientoRepository {
     // Capacidad máxima del estacionamiento
     public int CAPACIDAD_MAXIMA = 20;
 
-    // Configuración de tarifas (valores por defecto)
+    // Configuración de tarifas (solo tarifa por minuto)
     public double tarifaPorMinuto = 1.5;
-    public double tarifa1Minuto = 1.5;
-    public double tarifa0_1Hora = 5.0;
-    public double tarifa1_2Horas = 10.0;
-    public double tarifa2MasHoras = 15.0;
-    public double tarifaMaximaDiaria = 0.0;
-    public double tarifaMaximaSemanal = 0.0;
-    public double tarifaTicketPerdido = 0.0;
 
     /**
      * Inicializa las estructuras con valores por defecto

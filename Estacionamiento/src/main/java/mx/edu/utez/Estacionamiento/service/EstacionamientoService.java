@@ -145,9 +145,18 @@ public class EstacionamientoService {
             repository.getLugaresOcupados().insertarAlFinal(nuevoCoche);
             System.out.println("   ✅ Agregado a ListaSimple. Tamaño: " + repository.getLugaresOcupados().getTamano());
             
-            // 2. Árbol Binario (búsqueda rápida O(log n))
+            // 2. Árbol Binario (búsqueda rápida O(log n)) - USO DE RECURSIVIDAD
+            System.out.println("   🌳 Insertando en Árbol Binario usando recursividad...");
             repository.getArbolBusqueda().insertar(nuevoCoche);
             System.out.println("   ✅ Agregado a ÁrbolBinario. Tamaño: " + repository.getArbolBusqueda().getTamano());
+            
+            // Mostrar estadísticas del árbol usando métodos recursivos
+            java.util.Map<String, Object> statsArbol = repository.getArbolBusqueda().obtenerEstadisticas();
+            System.out.println("   📊 Estadísticas del Árbol Binario (calculadas con recursividad):");
+            System.out.println("      - Altura: " + statsArbol.get("altura") + " niveles");
+            System.out.println("      - Hojas: " + statsArbol.get("hojas") + " nodos");
+            System.out.println("      - Nodos internos: " + statsArbol.get("nodosInternos"));
+            System.out.println("      - Es BST válido: " + statsArbol.get("esBSTValido"));
             
             // 3. Cola Circular (rotación de espacios)
             if (repository.getEspaciosRotativos() != null && !repository.getEspaciosRotativos().colaLlena()) {
@@ -195,13 +204,18 @@ public class EstacionamientoService {
         final String placaNormalizada = placa.trim().toUpperCase();
         System.out.println("📋 Placa recibida: " + placaNormalizada);
 
-        // 1. Buscar el coche usando Árbol Binario (búsqueda rápida O(log n))
-        System.out.println("🔍 Buscando vehículo usando Árbol Binario (búsqueda O(log n))...");
+        // 1. Buscar el coche usando Árbol Binario (búsqueda rápida O(log n)) - RECURSIVIDAD
+        System.out.println("🔍 Buscando vehículo usando Árbol Binario (búsqueda recursiva O(log n))...");
         Coche cocheBusqueda = new Coche(placaNormalizada);
         Coche cocheEncontrado = repository.getArbolBusqueda().buscar(cocheBusqueda);
         
         if (cocheEncontrado != null) {
             System.out.println("✅ Vehículo encontrado en Árbol Binario: " + cocheEncontrado.getPlaca());
+            
+            // Calcular profundidad del nodo usando recursividad
+            int profundidad = repository.getArbolBusqueda().obtenerProfundidad(cocheEncontrado);
+            System.out.println("   🌳 Profundidad del nodo (calculada con recursividad): " + profundidad + " niveles");
+            
             // También buscar en ListaSimple para obtener la posición
             int posicion = repository.getLugaresOcupados().buscarIndice(cocheEncontrado);
             if (posicion != -1) {
@@ -220,15 +234,17 @@ public class EstacionamientoService {
 
         // 2. Eliminar el coche de todas las estructuras
         System.out.println("\n🗑️  Eliminando vehículo de estructuras de datos...");
+        
         int tamanoAntes = repository.getLugaresOcupados().getTamano();
         
         // Eliminar de ListaSimple
         boolean eliminadoLista = repository.getLugaresOcupados().eliminarPorValor(cocheEncontrado);
         System.out.println("   - ListaSimple: " + (eliminadoLista ? "✅ Eliminado" : "❌ No encontrado"));
         
-        // Eliminar de Árbol Binario
+        // Eliminar del Árbol Binario usando recursividad
+        System.out.println("   🌳 Eliminando del Árbol Binario (eliminación recursiva)...");
         boolean eliminadoArbol = repository.getArbolBusqueda().eliminar(cocheEncontrado);
-        System.out.println("   - ÁrbolBinario: " + (eliminadoArbol ? "✅ Eliminado" : "❌ No encontrado"));
+        System.out.println("   - ÁrbolBinario: " + (eliminadoArbol ? "✅ Eliminado (recursivo)" : "❌ No encontrado"));
         
         if (!eliminadoLista && !eliminadoArbol) {
             System.out.println("❌ ERROR: No se pudo eliminar el coche " + placaNormalizada + " de ninguna estructura");
@@ -655,66 +671,115 @@ public class EstacionamientoService {
         Map<String, Object> tarifas = new HashMap<>();
         tarifas.put("tarifaPorMinuto", repository.tarifaPorMinuto);
         tarifas.put("tarifaPorHora", repository.tarifaPorMinuto * 60);
-        tarifas.put("tarifa1Minuto", repository.tarifa1Minuto);
-        tarifas.put("tarifa0_1Hora", repository.tarifa0_1Hora);
-        tarifas.put("tarifa1_2Horas", repository.tarifa1_2Horas);
-        tarifas.put("tarifa2MasHoras", repository.tarifa2MasHoras);
-        tarifas.put("tarifaMaximaDiaria", repository.tarifaMaximaDiaria);
-        tarifas.put("tarifaMaximaSemanal", repository.tarifaMaximaSemanal);
-        tarifas.put("tarifaTicketPerdido", repository.tarifaTicketPerdido);
         return tarifas;
     }
 
     /**
      * Actualiza la configuración de tarifas
-     * Actualiza en memoria y sincroniza con BD
+     * Actualiza en memoria
      */
     public Map<String, Object> actualizarTarifas(Map<String, Object> nuevasTarifas) {
         System.out.println("\n═══════════════════════════════════════════════════════════");
         System.out.println("💰 PROCESO: ACTUALIZAR TARIFAS");
         System.out.println("═══════════════════════════════════════════════════════════");
         
-        System.out.println("📋 Tarifas recibidas para actualizar:");
+        Map<String, Object> resultado = new HashMap<>();
+        
+        System.out.println("📋 Tarifa recibida para actualizar:");
         nuevasTarifas.forEach((key, value) -> System.out.println("   - " + key + ": " + value));
         
-        System.out.println("\n📝 Actualizando tarifas en memoria...");
+        System.out.println("\n📝 Actualizando tarifa en memoria...");
         if (nuevasTarifas.containsKey("tarifaPorMinuto")) {
-            repository.tarifaPorMinuto = ((Number) nuevasTarifas.get("tarifaPorMinuto")).doubleValue();
-            System.out.println("   ✅ tarifaPorMinuto: $" + repository.tarifaPorMinuto);
-        }
-        if (nuevasTarifas.containsKey("tarifa1Minuto")) {
-            repository.tarifa1Minuto = ((Number) nuevasTarifas.get("tarifa1Minuto")).doubleValue();
-            System.out.println("   ✅ tarifa1Minuto: $" + repository.tarifa1Minuto);
-        }
-        if (nuevasTarifas.containsKey("tarifa0_1Hora")) {
-            repository.tarifa0_1Hora = ((Number) nuevasTarifas.get("tarifa0_1Hora")).doubleValue();
-            System.out.println("   ✅ tarifa0_1Hora: $" + repository.tarifa0_1Hora);
-        }
-        if (nuevasTarifas.containsKey("tarifa1_2Horas")) {
-            repository.tarifa1_2Horas = ((Number) nuevasTarifas.get("tarifa1_2Horas")).doubleValue();
-            System.out.println("   ✅ tarifa1_2Horas: $" + repository.tarifa1_2Horas);
-        }
-        if (nuevasTarifas.containsKey("tarifa2MasHoras")) {
-            repository.tarifa2MasHoras = ((Number) nuevasTarifas.get("tarifa2MasHoras")).doubleValue();
-            System.out.println("   ✅ tarifa2MasHoras: $" + repository.tarifa2MasHoras);
-        }
-        if (nuevasTarifas.containsKey("tarifaMaximaDiaria")) {
-            repository.tarifaMaximaDiaria = ((Number) nuevasTarifas.get("tarifaMaximaDiaria")).doubleValue();
-            System.out.println("   ✅ tarifaMaximaDiaria: $" + repository.tarifaMaximaDiaria);
-        }
-        if (nuevasTarifas.containsKey("tarifaMaximaSemanal")) {
-            repository.tarifaMaximaSemanal = ((Number) nuevasTarifas.get("tarifaMaximaSemanal")).doubleValue();
-            System.out.println("   ✅ tarifaMaximaSemanal: $" + repository.tarifaMaximaSemanal);
-        }
-        if (nuevasTarifas.containsKey("tarifaTicketPerdido")) {
-            repository.tarifaTicketPerdido = ((Number) nuevasTarifas.get("tarifaTicketPerdido")).doubleValue();
-            System.out.println("   ✅ tarifaTicketPerdido: $" + repository.tarifaTicketPerdido);
+            double nuevaTarifa = ((Number) nuevasTarifas.get("tarifaPorMinuto")).doubleValue();
+            
+            // Validar que la tarifa sea válida
+            if (nuevaTarifa < 0) {
+                System.err.println("   ❌ ERROR: La tarifa no puede ser negativa");
+                resultado.put("exito", false);
+                resultado.put("mensaje", "ERROR: La tarifa no puede ser negativa");
+                return resultado;
+            }
+            
+            repository.tarifaPorMinuto = nuevaTarifa;
+            System.out.println("   ✅ tarifaPorMinuto actualizada: $" + repository.tarifaPorMinuto);
+            System.out.println("   ✅ tarifaPorHora calculada: $" + (repository.tarifaPorMinuto * 60));
+        } else {
+            System.err.println("   ⚠️  No se recibió tarifaPorMinuto en la solicitud");
+            resultado.put("exito", false);
+            resultado.put("mensaje", "ERROR: Se requiere el campo 'tarifaPorMinuto'");
+            return resultado;
         }
         
         System.out.println("✅ PROCESO COMPLETADO: Tarifas actualizadas correctamente.");
         System.out.println("═══════════════════════════════════════════════════════════\n");
         
         return obtenerTarifas();
+    }
+
+    /**
+     * Obtiene estadísticas del Árbol Binario usando métodos recursivos
+     * Demuestra el uso de recursividad para calcular propiedades del árbol
+     */
+    public Map<String, Object> obtenerEstadisticasArbolBinario() {
+        System.out.println("\n═══════════════════════════════════════════════════════════");
+        System.out.println("🌳 ESTADÍSTICAS DEL ÁRBOL BINARIO (USANDO RECURSIVIDAD)");
+        System.out.println("═══════════════════════════════════════════════════════════");
+        
+        java.util.Map<String, Object> stats = repository.getArbolBusqueda().obtenerEstadisticas();
+        
+        System.out.println("📊 Estadísticas calculadas con métodos recursivos:");
+        System.out.println("   - Tamaño: " + stats.get("tamano") + " vehículos");
+        System.out.println("   - Altura: " + stats.get("altura") + " niveles (recursivo)");
+        System.out.println("   - Hojas: " + stats.get("hojas") + " nodos (recursivo)");
+        System.out.println("   - Nodos internos: " + stats.get("nodosInternos") + " (recursivo)");
+        System.out.println("   - Es BST válido: " + stats.get("esBSTValido") + " (validación recursiva)");
+        System.out.println("   - Mínimo: " + stats.get("minimo"));
+        System.out.println("   - Máximo: " + stats.get("maximo"));
+        System.out.println("   - Está vacío: " + stats.get("estaVacio"));
+        System.out.println("═══════════════════════════════════════════════════════════\n");
+        
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("exito", true);
+        resultado.put("estadisticas", stats);
+        resultado.put("mensaje", "Estadísticas del árbol binario obtenidas usando métodos recursivos");
+        
+        return resultado;
+    }
+
+    /**
+     * Obtiene todos los vehículos ordenados del Árbol Binario usando recorrido inorden recursivo
+     * Demuestra el uso de recursividad para recorrer el árbol
+     */
+    public Map<String, Object> obtenerVehiculosOrdenadosArbol() {
+        System.out.println("\n═══════════════════════════════════════════════════════════");
+        System.out.println("🌳 VEHÍCULOS ORDENADOS DEL ÁRBOL BINARIO (RECORRIDO RECURSIVO)");
+        System.out.println("═══════════════════════════════════════════════════════════");
+        
+        // Obtener vehículos en orden usando recorrido inorden recursivo
+        java.util.List<Coche> vehiculosOrdenados = repository.getArbolBusqueda().obtenerTodos();
+        
+        System.out.println("📋 Vehículos obtenidos usando recorrido inorden recursivo:");
+        System.out.println("   Total: " + vehiculosOrdenados.size() + " vehículos");
+        
+        // Convertir a formato JSON-friendly
+        List<Map<String, Object>> vehiculosInfo = new ArrayList<>();
+        for (Coche coche : vehiculosOrdenados) {
+            Map<String, Object> info = new HashMap<>();
+            info.put("placa", coche.getPlaca());
+            info.put("horaEntrada", coche.getHoraEntrada());
+            vehiculosInfo.add(info);
+            System.out.println("   - " + coche.getPlaca() + " (entrada: " + coche.getHoraEntrada() + ")");
+        }
+        
+        System.out.println("═══════════════════════════════════════════════════════════\n");
+        
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("exito", true);
+        resultado.put("vehiculos", vehiculosInfo);
+        resultado.put("total", vehiculosOrdenados.size());
+        resultado.put("mensaje", "Vehículos ordenados obtenidos usando recorrido inorden recursivo");
+        
+        return resultado;
     }
 
 }

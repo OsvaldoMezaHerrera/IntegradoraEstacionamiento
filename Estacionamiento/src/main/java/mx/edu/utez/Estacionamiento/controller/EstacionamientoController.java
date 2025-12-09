@@ -154,4 +154,24 @@ public class EstacionamientoController {
         return ResponseEntity.ok(resultado);
     }
 
+    /**
+     * Obtiene estadísticas del Árbol Binario usando métodos recursivos
+     * Demuestra el uso de recursividad para calcular propiedades del árbol
+     */
+    @GetMapping("/arbol/estadisticas")
+    public ResponseEntity<Map<String, Object>> obtenerEstadisticasArbol() {
+        Map<String, Object> estadisticas = service.obtenerEstadisticasArbolBinario();
+        return ResponseEntity.ok(estadisticas);
+    }
+
+    /**
+     * Obtiene todos los vehículos ordenados del Árbol Binario (recorrido inorden recursivo)
+     * Demuestra el uso de recursividad para recorrer el árbol
+     */
+    @GetMapping("/arbol/vehiculos-ordenados")
+    public ResponseEntity<Map<String, Object>> obtenerVehiculosOrdenados() {
+        Map<String, Object> resultado = service.obtenerVehiculosOrdenadosArbol();
+        return ResponseEntity.ok(resultado);
+    }
+
 }

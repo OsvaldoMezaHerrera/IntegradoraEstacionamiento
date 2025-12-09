@@ -20,6 +20,14 @@ function formatearMonedaNumero(cantidad) {
   return cantidad.toFixed(2);
 }
 
+// Función para formatear moneda con símbolo
+function formatearMoneda(cantidad) {
+  if (typeof cantidad !== 'number' || isNaN(cantidad)) {
+    return '$0.00';
+  }
+  return '$' + cantidad.toFixed(2);
+}
+
 // Cargar tarifas actuales
 async function cargarTarifas() {
   try {
@@ -39,30 +47,12 @@ async function cargarTarifas() {
     const tarifas = await response.json();
     console.log("Tarifas recibidas del servidor:", tarifas);
 
-    document.getElementById("tarifa-1-minuto").value = formatearMonedaNumero(
-      tarifas.tarifa1Minuto || 1.50
-    );
-    document.getElementById("tarifa-0-1").value = formatearMonedaNumero(
-      tarifas.tarifa0_1Hora
-    );
-    document.getElementById("tarifa-1-2").value = formatearMonedaNumero(
-      tarifas.tarifa1_2Horas
-    );
-    document.getElementById("tarifa-2-plus").value = formatearMonedaNumero(
-      tarifas.tarifa2MasHoras
-    );
-    document.getElementById("maximo-diario").value =
-      tarifas.tarifaMaximaDiaria > 0
-        ? formatearMonedaNumero(tarifas.tarifaMaximaDiaria)
-        : "";
-    document.getElementById("maximo-semanal").value =
-      tarifas.tarifaMaximaSemanal > 0
-        ? formatearMonedaNumero(tarifas.tarifaMaximaSemanal)
-        : "";
-    document.getElementById("ticket-perdido").value =
-      tarifas.tarifaTicketPerdido > 0
-        ? formatearMonedaNumero(tarifas.tarifaTicketPerdido)
-        : "";
+    // Cargar tarifa por minuto
+    const tarifaPorMinuto = tarifas.tarifaPorMinuto || 1.50;
+    document.getElementById("tarifa-por-minuto").value = formatearMonedaNumero(tarifaPorMinuto);
+    
+    // Actualizar tarifa por hora calculada
+    actualizarTarifaPorHora(tarifaPorMinuto);
     
   } catch (error) {
     console.error("Error al cargar tarifas:", error);
@@ -74,58 +64,43 @@ async function cargarTarifas() {
   }
 }
 
+// Actualizar tarifa por hora calculada
+function actualizarTarifaPorHora(tarifaPorMinuto) {
+  const tarifaPorHora = tarifaPorMinuto * 60;
+  const displayElement = document.getElementById("tarifa-por-hora-display");
+  if (displayElement) {
+    displayElement.textContent = formatearMoneda(tarifaPorHora);
+  }
+}
+
 
 // Guardar tarifas
 const btnGuardar = document.getElementById("btn-guardar");
 
+// Actualizar tarifa por hora cuando cambia la tarifa por minuto
+document.getElementById("tarifa-por-minuto").addEventListener("input", function() {
+  const tarifaPorMinuto = parseFloat(this.value) || 0;
+  actualizarTarifaPorHora(tarifaPorMinuto);
+});
+
 btnGuardar.addEventListener("click", async () => {
+  const tarifaPorMinutoInput = document.getElementById("tarifa-por-minuto").value;
+  const tarifaPorMinuto = parseFloat(tarifaPorMinutoInput);
+
+  // Validar que la tarifa sea válida
+  if (isNaN(tarifaPorMinuto)) {
+    mostrarMensaje("Por favor ingrese un valor válido para la tarifa por minuto", true);
+    return;
+  }
+
+  if (tarifaPorMinuto < 0) {
+    mostrarMensaje("La tarifa no puede ser negativa", true);
+    return;
+  }
+
   const nuevasTarifas = {
-    tarifa1Minuto: parseFloat(
-      document.getElementById("tarifa-1-minuto").value
-    ),
-    tarifa0_1Hora: parseFloat(
-      document.getElementById("tarifa-0-1").value
-    ),
-    tarifa1_2Horas: parseFloat(
-      document.getElementById("tarifa-1-2").value
-    ),
-    tarifa2MasHoras: parseFloat(
-      document.getElementById("tarifa-2-plus").value
-    ),
-    tarifaMaximaDiaria: parseFloat(
-      document.getElementById("maximo-diario").value || "0"
-    ),
-    tarifaMaximaSemanal: parseFloat(
-      document.getElementById("maximo-semanal").value || "0"
-    ),
-    tarifaTicketPerdido: parseFloat(
-      document.getElementById("ticket-perdido").value || "0"
-    ),
+    tarifaPorMinuto: tarifaPorMinuto
   };
-
-  // Validar que las tarifas por tiempo sean válidas
-  if (
-    isNaN(nuevasTarifas.tarifa1Minuto) ||
-    isNaN(nuevasTarifas.tarifa0_1Hora) ||
-    isNaN(nuevasTarifas.tarifa1_2Horas) ||
-    isNaN(nuevasTarifas.tarifa2MasHoras)
-  ) {
-    mostrarMensaje(
-      "Por favor ingrese valores válidos para todas las tarifas",
-      true
-    );
-    return;
-  }
-
-  if (
-    nuevasTarifas.tarifa1Minuto < 0 ||
-    nuevasTarifas.tarifa0_1Hora < 0 ||
-    nuevasTarifas.tarifa1_2Horas < 0 ||
-    nuevasTarifas.tarifa2MasHoras < 0
-  ) {
-    mostrarMensaje("Las tarifas no pueden ser negativas", true);
-    return;
-  }
 
   btnGuardar.disabled = true;
   btnGuardar.innerHTML = '<span class="truncate">Guardando...</span>';

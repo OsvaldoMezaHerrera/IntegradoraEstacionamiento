@@ -73,7 +73,7 @@
                   Gestión de Tarifas
                 </h2>
                 <p class="app-section-description">
-                  Configure y ajuste las tarifas de estacionamiento según diferentes rangos de tiempo.
+                  Configure la tarifa por minuto de estacionamiento. El costo se calculará multiplicando esta tarifa por los minutos de estancia.
                 </p>
               </div>
             </section>
@@ -81,167 +81,41 @@
             <!-- Formulario de tarifas -->
             <form class="card" aria-label="Formulario de gestión de tarifas" onsubmit="return false;">
               
-              <!-- Sección: Tabla de Tarifas por Tiempo -->
+              <!-- Campo: Tarifa por Minuto -->
               <div class="form-group">
-                <label class="form-label">
-                  Tarifas por Rango de Tiempo
+                <label for="tarifa-por-minuto" class="form-label">
+                  Tarifa por Minuto ($)
                 </label>
-                <div class="table-container" style="border-radius: var(--border-radius-lg);">
-                  <table class="table" role="table" aria-label="Tarifas de estacionamiento por rango de tiempo">
-                    <thead>
-                      <tr role="row">
-                        <th scope="col">Rango de Tiempo</th>
-                        <th scope="col">Tarifa</th>
-                      </tr>
-                    </thead>
-                    <tbody role="rowgroup">
-                      <!-- Fila: Tarifa 1 Minuto -->
-                      <tr role="row">
-                        <td role="cell">1 Minuto</td>
-                        <td role="cell">
-                          <label for="tarifa-1-minuto" class="util-sr-only">Tarifa para 1 minuto</label>
-                          <input
-                            type="number"
-                            id="tarifa-1-minuto"
-                            name="tarifa-1-minuto"
-                            step="0.01"
-                            min="0"
-                            class="form-input"
-                            style="min-height: 2.5rem; padding: var(--spacing-sm) var(--spacing-md);"
-                            aria-label="Ingrese la tarifa para estancias de 1 minuto"
-                            aria-required="true"
-                          />
-                        </td>
-                      </tr>
-                      
-                      <!-- Fila: Tarifa 0-1 Hora -->
-                      <tr role="row">
-                        <td role="cell">0-1 Hora</td>
-                        <td role="cell">
-                          <label for="tarifa-0-1" class="util-sr-only">Tarifa para 0 a 1 hora</label>
-                          <input
-                            type="number"
-                            id="tarifa-0-1"
-                            name="tarifa-0-1"
-                            step="0.01"
-                            min="0"
-                            class="form-input"
-                            style="min-height: 2.5rem; padding: var(--spacing-sm) var(--spacing-md);"
-                            aria-label="Ingrese la tarifa para estancias de 0 a 1 hora"
-                            aria-required="true"
-                          />
-                        </td>
-                      </tr>
-                      
-                      <!-- Fila: Tarifa 1-2 Horas -->
-                      <tr role="row">
-                        <td role="cell">1-2 Horas</td>
-                        <td role="cell">
-                          <label for="tarifa-1-2" class="util-sr-only">Tarifa para 1 a 2 horas</label>
-                          <input
-                            type="number"
-                            id="tarifa-1-2"
-                            name="tarifa-1-2"
-                            step="0.01"
-                            min="0"
-                            class="form-input"
-                            style="min-height: 2.5rem; padding: var(--spacing-sm) var(--spacing-md);"
-                            aria-label="Ingrese la tarifa para estancias de 1 a 2 horas"
-                            aria-required="true"
-                          />
-                        </td>
-                      </tr>
-                      
-                      <!-- Fila: Tarifa 2+ Horas -->
-                      <tr role="row">
-                        <td role="cell">2+ Horas</td>
-                        <td role="cell">
-                          <label for="tarifa-2-plus" class="util-sr-only">Tarifa para más de 2 horas</label>
-                          <input
-                            type="number"
-                            id="tarifa-2-plus"
-                            name="tarifa-2-plus"
-                            step="0.01"
-                            min="0"
-                            class="form-input"
-                            style="min-height: 2.5rem; padding: var(--spacing-sm) var(--spacing-md);"
-                            aria-label="Ingrese la tarifa para estancias de más de 2 horas"
-                            aria-required="true"
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <input
+                  id="tarifa-por-minuto"
+                  name="tarifa-por-minuto"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="form-input"
+                  style="font-size: var(--font-size-xl); font-weight: 600; text-align: center;"
+                  aria-label="Ingrese la tarifa por minuto de estacionamiento"
+                  aria-required="true"
+                  required
+                />
+                <span class="form-help">
+                  Esta tarifa se multiplicará por los minutos de estancia para calcular el costo total.
+                  <br>
+                  <strong>Ejemplo:</strong> Si la tarifa es $1.50/min y un vehículo está 30 minutos, el costo será $45.00
+                </span>
               </div>
 
-              <!-- Sección: Tarifas Adicionales -->
-              <div class="form-group">
-                <h3 class="app-section-subtitle" style="padding-top: 0; padding-bottom: var(--spacing-md); font-size: var(--font-size-lg);">
-                  Tarifas Adicionales
-                </h3>
-                
-                <!-- Campo: Máximo Diario -->
-                <div class="form-group" style="margin-bottom: var(--spacing-md);">
-                  <label for="maximo-diario" class="form-label">
-                    Máximo Diario
-                  </label>
-                  <input
-                    id="maximo-diario"
-                    name="maximo-diario"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0 = Sin límite"
-                    class="form-input"
-                    aria-label="Ingrese el máximo diario de tarifa (0 significa sin límite)"
-                    aria-describedby="ayuda-maximo-diario"
-                  />
-                  <span id="ayuda-maximo-diario" class="form-help">
-                    Ingrese 0 para indicar que no hay límite diario
-                  </span>
+              <!-- Información de tarifa por hora calculada -->
+              <div class="form-group" style="background: var(--color-bg-secondary); padding: var(--spacing-md); border-radius: var(--border-radius-md);">
+                <label class="form-label" style="margin-bottom: var(--spacing-sm);">
+                  Tarifa por Hora (Calculada)
+                </label>
+                <div id="tarifa-por-hora-display" style="font-size: var(--font-size-lg); font-weight: 600; color: var(--color-primary);">
+                  $0.00
                 </div>
-
-                <!-- Campo: Máximo Semanal -->
-                <div class="form-group" style="margin-bottom: var(--spacing-md);">
-                  <label for="maximo-semanal" class="form-label">
-                    Máximo Semanal
-                  </label>
-                  <input
-                    id="maximo-semanal"
-                    name="maximo-semanal"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0 = Sin límite"
-                    class="form-input"
-                    aria-label="Ingrese el máximo semanal de tarifa (0 significa sin límite)"
-                    aria-describedby="ayuda-maximo-semanal"
-                  />
-                  <span id="ayuda-maximo-semanal" class="form-help">
-                    Ingrese 0 para indicar que no hay límite semanal
-                  </span>
-                </div>
-
-                <!-- Campo: Tarifa por Ticket Perdido -->
-                <div class="form-group" style="margin-bottom: var(--spacing-md);">
-                  <label for="ticket-perdido" class="form-label">
-                    Tarifa por Ticket Perdido
-                  </label>
-                  <input
-                    id="ticket-perdido"
-                    name="ticket-perdido"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
-                    class="form-input"
-                    aria-label="Ingrese la tarifa a cobrar cuando se pierde el ticket de estacionamiento"
-                  />
-                  <span class="form-help">
-                    Tarifa adicional cuando el cliente pierde su ticket
-                  </span>
-                </div>
+                <span class="form-help" style="margin-top: var(--spacing-xs);">
+                  Esta tarifa se calcula automáticamente multiplicando la tarifa por minuto por 60
+                </span>
               </div>
 
               <!-- Mensaje de estado del formulario -->
